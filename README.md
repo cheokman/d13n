@@ -67,10 +67,10 @@ Above is to generate a project named g2 and application piston.
 
 Run Docker Test Step
 
-'''bash
+```bash
 cd piston
 make test
-'''
+```
 
 ## Developement Stage to build gem
 
