@@ -56,4 +56,14 @@ Generating Jekinsfile ...
 
 Above is to generate a project named g2 and application piston.
 
+## Developement Stage to build gem
 
+* checkout the master
+* build gem with gemspec file
+* install gem locally
+```bash
+git http://{your name}@stash.mo.laxino.com/scm/~ben.wu/d13n.git
+cd d13n
+gem build d13n.gemspec
+gem install -l d13n-{version}.gem
+```
