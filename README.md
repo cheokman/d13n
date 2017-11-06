@@ -63,7 +63,7 @@ Above is to generate a project named g2 and application piston.
 * install gem locally
 
 ```bash
-git http://{your name}@stash.mo.laxino.com/scm/~ben.wu/d13n.git
+git clone http://{your name}@stash.mo.laxino.com/scm/~ben.wu/d13n.git
 cd d13n
 gem build d13n.gemspec
 gem install -l d13n-{version}.gem
