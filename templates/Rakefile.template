@@ -1,0 +1,6 @@
+require 'rake'
+require 'rake/testtask'
+require 'rdoc/task'
+Dir.glob('tasks/*.rake').each { |r| import r }
+
+task :default => :spec
