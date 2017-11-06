@@ -1,0 +1,18 @@
+FROM busybox:latest
+MAINTAINER Ben Wu <wucheokman@gmail.com>
+
+ENV DEPLOY_PATH=/opt/deploy 
+ENV APP_PATH=$DEPLOY_PATH/application 
+ENV REL_PATH=$APP_PATH/release 
+ENV SHARE_PATH=$APP_PATH/shared
+
+RUN mkdir -p $REL_PATH && \
+    mkdir -p $APP_PATH/reports && \
+    mkdir -p $SHARE_PATH/build && \
+    mkdir -p $SHARE_PATH/log && \
+    mkdir -p $SHARE_PATH/pids && \
+    mkdir -p $SHARE_PATH/system
+
+COPY . $REL_PATH
+VOLUME /opt/deploy/application
+LABEL application=<%= application %>

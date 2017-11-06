@@ -1,0 +1,4 @@
+source 'http://gems:8808'
+source 'http://rubygems.org'
+
+gem 'd13n', '<%= D13n::VERSION::STRING %>'

@@ -1,0 +1,53 @@
+version: '2'
+services:
+  test:
+    build:
+      context: ../../
+      dockerfile: docker/development/Dockerfile
+    volumes_from:
+      - cache
+    links:
+      - db
+    environment:
+      RAILS_ENV: test
+      HOST_IP: localhost
+      HOST_PORT: 3000
+      MYSQL_HOST: db
+      MYSQL_DATABASE: <%= application %>_test
+      MYSQL_USER: laxino
+      MYSQL_PASSWORD: password
+      TEST_OUTPUT_DIR: /opt/deploy/application/reports
+
+  builder:
+    build:
+      context: ../../
+      dockerfile: docker/development/Dockerfile
+    volumes_from:
+      - cache
+    entrypoint: "entrypoint.sh"
+    command: ['bundle', 'install']
+
+  agent:
+    image: cheokman/ansible
+    links:
+      - db
+    environment:
+      PROBE_HOST: "db"
+      PROBE_PORT: "3306"
+    command: ["probe.yml"]
+
+  db:
+    image: mysql:5.7
+    hostname: db
+    expose:
+      - "3306"
+    environment:
+      MYSQL_USER: laxino
+      MYSQL_DATABASE: <%= application %>_test
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: password
+
+  cache:
+    build:
+      context: ../../
+      dockerfile: docker/development/Dockerfile.cache

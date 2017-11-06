@@ -1,0 +1,5 @@
+mp/*
+log/*
+db/*.sqlite3
+.git
+docker
