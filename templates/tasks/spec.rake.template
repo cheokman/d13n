@@ -1,0 +1,21 @@
+namespace :spec do
+  require 'rspec/core/rake_task'
+  desc "Run all specs for CI"
+  RSpec::Core::RakeTask.new(:ci) do |spec|
+    Rake::Task['db:migrate:up'].invoke
+    spec.rspec_opts = '-c --format documentation --format html --out reports/spec.html'
+  end
+  
+  desc "Run unit test specs"
+  RSpec::Core::RakeTask.new(:unit) do |t|
+    # ENV['DATABASE_URL'] ||= 'sqlite://migrations/test.db'
+    Rake::Task['db:migrate:up'].invoke
+    t.pattern = Dir['spec/unit/**/*_spec.rb'].reject{ |f| f['/functional'] }
+  end
+
+  desc "Run functional test specs"
+  RSpec::Core::RakeTask.new(:functional) do |t|
+    Rake::Task['db:migrate:up'].invoke
+    t.pattern = "spec/functional/**/*_spec.rb"
+  end
+end

@@ -1,0 +1,11 @@
+namespace :db do
+  namespace :migrate do
+    task :up do
+      puts '*** db:migrate:up executed ***'
+    end
+
+    task :down do
+      puts '*** db:migrate:down executed ***'
+    end
+  end
+end
