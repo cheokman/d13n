@@ -1,4 +1,16 @@
-source 'http://gems:8808'
-source 'http://rubygems.org'
+source 'http://gems.sd.laxino.com'
+#source 'http://rubygems.org'
 
-gem 'd13n', '<%= D13n::VERSION::STRING %>'
+# gem 'd13n', '<%= D13n::VERSION::STRING %>'
+
+gem 'rake'
+
+group :test do
+  gem 'simplecov'
+  gem 'rspec'
+  gem 'rspec-nc'
+  gem 'factory_bot'
+  gem 'rack-test'
+  gem 'faker'
+  gem 'as-duration'
+end
