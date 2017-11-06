@@ -17,7 +17,7 @@ To lower the barrier for developer bootstrap a docker compactable Microserivce a
 * CI Build and Release Docker files and scripts
 * CI Workflow Makefile 
 * DB Migration folder
-* Jenkinefiles 
+* Jenkinsfile
 * Application Configuration YAML file
 
 ### How to Use
