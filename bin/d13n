@@ -1,0 +1,11 @@
+#!/usr/bin/env ruby
+
+$LOAD_PATH << File.expand_path(File.join File.dirname(__FILE__), '..', 'lib')
+require 'd13n/cli/command'
+begin
+  D13n::Cli::Command.run
+rescue D13n::Cli::Command::CommandFailure => failure
+  STDERR.puts failure.message
+  STDERR.puts failure.options if failure.options
+  exit 1
+end
