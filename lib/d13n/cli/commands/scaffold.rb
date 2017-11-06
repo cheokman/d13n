@@ -1,14 +1,16 @@
 require 'fileutils'
 require 'erb'
+require 'd13n/version'
 module D13n::Cli
   class Scaffold < Command
     def self.command; "scaffold"; end
 
-    attr_accessor :application, :project
+    attr_accessor :application, :project, :ruby_version
 
     def initialize(args)
       @bare = false
       @application = nil
+      @ruby_version = '2.3.1'
       super(args)
     end
 
@@ -38,17 +40,25 @@ module D13n::Cli
 
       @current_home = Dir.pwd
 
+      rake_scaffold
+
       migration_scaffold
+
+      gem_scaffold
 
       makefile_scaffold
 
-      application_yaml_scaffold
+      application_yml_scaffold
 
       docker_scaffold
 
       docker_script_scaffold
 
       jekinsfile_scaffold
+
+      ruby_version_scaffold
+
+      spec_scaffold
         
     end
 
@@ -72,6 +82,26 @@ module D13n::Cli
         root_dir = "#{@migration_root}/#{dir}"
         Dir.mkdir(root_dir) unless File.directory?(root_dir)
       end
+
+      puts "Generating Rake migration file ..."
+
+      File.open(File.join(@template_home, @rake_task_root, 'migration.rake.template')) do |tfh|
+        erb = ERB.new(tfh.read)
+        File.open(File.join(@current_home, @rake_task_root, "migration.rake"), 'w') do |ofh|
+          ofh.print erb.result(binding)
+        end
+      end
+    end
+
+    def gem_scaffold
+      puts "Generating Gemfile ..."
+
+      File.open(File.join(@template_home, 'Gemfile.template')) do |tfh|
+        erb = ERB.new(tfh.read)
+        File.open(File.join(@current_home, "Gemfile"), 'w') do |ofh|
+          ofh.print erb.result(binding)
+        end
+      end
     end
     
     def makefile_scaffold
@@ -84,11 +114,11 @@ module D13n::Cli
       end
     end
 
-    def application_yaml_scaffold
-      puts "Generating #{@application}.yaml ..."
-      File.open(File.join(@template_home, 'application.yaml.template')) do |tfh|
+    def application_yml_scaffold
+      puts "Generating #{@application}.yml ..."
+      File.open(File.join(@template_home, 'application.yml.template')) do |tfh|
         erb = ERB.new(tfh.read)
-        File.open(File.join(@current_home, "#{@application}.yaml"), 'w') do |ofh|
+        File.open(File.join(@current_home, "#{@application}.yml"), 'w') do |ofh|
           ofh.print erb.result(binding)
         end
       end
@@ -99,8 +129,8 @@ module D13n::Cli
       @docker_root = 'docker'
       Dir.mkdir(@docker_root) unless File.directory?(@docker_root)
 
-      @docker_development_files = ['docker-compose.yaml','Dockerfile.cache','Dockerfile']
-      @docker_release_files = ['docker-compose.yaml', 'Dockerfile']
+      @docker_development_files = ['docker-compose.yml','Dockerfile.cache','Dockerfile']
+      @docker_release_files = ['docker-compose.yml', 'Dockerfile']
 
       docker_stage(@docker_root, 'development', @docker_development_files)
       docker_stage(@docker_root, 'release', @docker_release_files)
@@ -114,7 +144,7 @@ module D13n::Cli
       puts "Generating #{stage} docker files ..."
       stage_dir = "#{root}/#{stage}"
       files.each do |file|
-        File.open(File.join(@template_home, "docker/" "#{file}.#{stage}")) do |tfh|
+        File.open(File.join(@template_home, "docker", "#{file}.#{stage}")) do |tfh|
           erb = ERB.new(tfh.read)
           File.open(File.join(@current_home, stage_dir, file), 'w') do |ofh|
             ofh.print erb.result(binding)
@@ -147,6 +177,74 @@ module D13n::Cli
           ofh.print erb.result(binding)
         end
       end
+    end
+
+    def ruby_version_scaffold
+      puts "Generating Ruby Version file ..."
+
+      File.open(File.join(@template_home, ".ruby-version.template")) do |tfh|
+        erb = ERB.new(tfh.read)
+        File.open(File.join(@current_home, ".ruby-version"), 'w') do |ofh|
+          ofh.print erb.result(binding)
+        end
+      end
+    end
+
+    def spec_scaffold
+      puts "Generating RSpec configuraion file ..."
+
+      File.open(File.join(@template_home, ".rspec.template")) do |tfh|
+        erb = ERB.new(tfh.read)
+        File.open(File.join(@current_home, ".rspec"), 'w') do |ofh|
+          ofh.print erb.result(binding)
+        end
+      end
+
+      puts "Generating Spec folders ..."
+
+      @spec_root = 'spec'
+
+      Dir.mkdir(@spec_root) unless File.directory?(@spec_root)
+
+      ['unit', 'functional', 'factories'].each do |folder|
+        spec_sub_dir = File.join(@spec_root, folder)
+        Dir.mkdir(spec_sub_dir) unless File.directory?(spec_sub_dir)
+      end
+
+      puts "Generating Rspec Helper file ..."
+
+      File.open(File.join(@template_home, "spec", "spec_helper.rb.template")) do |tfh|
+        erb = ERB.new(tfh.read)
+        File.open(File.join(@current_home, "spec", "spec_helper.rb"), 'w') do |ofh|
+          ofh.print erb.result(binding)
+        end
+      end
+
+      puts 'Generating Rspec rake task file ...'
+
+      File.open(File.join(@template_home, @rake_task_root, "spec.rake.template")) do |tfh|
+        erb = ERB.new(tfh.read)
+        File.open(File.join(@current_home, @rake_task_root, "spec.rake"), 'w') do |ofh|
+          ofh.print erb.result(binding)
+        end
+      end
+    end
+
+    def rake_scaffold
+      puts "Generating Rake file ..."
+
+      File.open(File.join(@template_home, "Rakefile.template")) do |tfh|
+        erb = ERB.new(tfh.read)
+        File.open(File.join(@current_home, "Rakefile"), 'w') do |ofh|
+          ofh.print erb.result(binding)
+        end
+      end
+
+      puts "Generating Rake Task folder ..."
+
+      @rake_task_root = 'tasks'
+
+      Dir.mkdir(@rake_task_root) unless File.directory?(@rake_task_root)
     end
 
     def options
