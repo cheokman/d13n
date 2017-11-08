@@ -1,4 +1,5 @@
 require 'd13n/version'
+require 'd13n/application'
 require 'logger'
 module D13n
   class D13nError < StandardError;end
