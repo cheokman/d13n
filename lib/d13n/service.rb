@@ -1,9 +1,9 @@
-require 'ext/string'
-require 'service/start'
+require 'd13n/ext/string'
+require 'd13n/service/start'
 module D13n
   class Service
-    class SerivceError < D13nError; end
-    class ServiceStartError < D13nError; end
+    class ServiceError < D13nError; end
+    class ServiceStartError < ServiceError; end
 
     include Start
     class << self
@@ -26,7 +26,7 @@ module D13n
 
       def inherited(descendant)
         raise ServiceError, "You cannot have more than one D13n::Service" if D13n.service
-        # descendant.app_class.extend Application::ClassMethods
+        descendant.app_class.extend Application::ClassMethods
         D13n.application = descendant.app_class
         # D13n.extend Application::ClassMethods
         D13n.service = descendant.instance
@@ -41,7 +41,7 @@ module D13n
     end
 
     def init_service(opts)
-      # determine_service_conf(opts)
+      determine_service_conf(opts)
       # determine_env(opts)
 
       # config_service(opts)
