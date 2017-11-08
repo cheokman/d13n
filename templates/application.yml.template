@@ -1,8 +1,8 @@
 common: &default_settings
-  app_name: <%= application %>
+  app_name: '<%= application %>'
 
   # Logging level for log/<%= application %>.log
-  log_level: info
+  log_level: 'info'
 
 development:
   <<: *default_settings
