@@ -10,7 +10,7 @@ module D13n::Cli
     def initialize(args)
       @bare = false
       @application = nil
-      @ruby_version = '2.3.1'
+      @ruby_version = '2.3.3'
       super(args)
     end
 
@@ -117,6 +117,9 @@ module D13n::Cli
       puts "Generating application[#{application_base}] api folder ..."
       api_root = File.join('lib',application,'api')
       Dir.mkdir(api_root)
+
+      application_source_path = File.join("lib","#{application}")
+      template_erb('api.rb.template','api.rb','lib', application_source_path)
 
       api_template_root = File.join('lib', 'api')
       puts api_template_root
