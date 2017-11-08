@@ -1,10 +1,13 @@
 require 'd13n/version'
-require 'd13n/application'
-require 'logger'
+#require 'logger'
 module D13n
   class D13nError < StandardError;end
   
   class << self
+    def config
+      @config ||= {}
+    end
+
     # def config
     #   @config ||= D13n::Configuration::Manager.new
     # end
@@ -32,5 +35,16 @@ module D13n
     def service=(srv)
       threaded[:service] = srv
     end
+
+    def application
+      threaded[:application] ||= nil
+    end
+
+    def application=(app)
+      threaded[:application] = app
+    end
   end
 end
+
+require 'd13n/application'
+require 'd13n/service'
