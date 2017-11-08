@@ -1,4 +1,4 @@
-require 'config-kit'
+#require 'config-kit'
 
 module D13n
   class Service
