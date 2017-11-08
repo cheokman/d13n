@@ -5,7 +5,7 @@ module D13n::Cli
   class Scaffold < Command
     def self.command; "scaffold"; end
 
-    attr_accessor :application, :project, :ruby_version
+    attr_accessor :application, :project, :ruby_version, :application_base
 
     def initialize(args)
       @bare = false
@@ -33,12 +33,16 @@ module D13n::Cli
       @template_home = File.join(File.expand_path(File.dirname(__FILE__)), '..', '..', '..', '..', 'templates')
 
       unless @bare
-        puts "Setting up appication [#{application_base}] directories..."
+        puts "Setting up application [#{application_base}] directories..."
         Dir.mkdir(@application) unless File.directory?(@application)
         Dir.chdir(@application)
       end
 
       @current_home = Dir.pwd
+
+      unless @bare
+        application_scaffold
+      end
 
       rake_scaffold
 
@@ -69,7 +73,62 @@ module D13n::Cli
     end
 
     def application_const
-      @application_const ||= "#{application_base}::Application"
+      @application_const ||= "#{application_base}::Service"
+    end
+
+    def template_erb(src, dst, src_sub_path=nil, dst_sub_path=nil)
+      src_file = if src_sub_path.nil?
+        File.join(@template_home,src)
+      else
+        File.join(@template_home, src_sub_path, src)
+      end
+      dst_file = if dst_sub_path.nil?
+        File.join(@current_home,dst)
+      else
+        File.join(@current_home, dst_sub_path, dst)
+      end
+      File.open(src_file) do |tfh|
+        erb = ERB.new(tfh.read)
+        File.open(dst_file, 'w') do |ofh|
+          ofh.print erb.result(binding)
+        end
+      end
+    end
+
+    def application_scaffold
+      puts "Generating application[#{application_base}] lib folder ..."
+      Dir.mkdir('lib')
+      application_source_path = File.join("lib","#{application}")
+      Dir.mkdir(application_source_path)
+
+      puts "Generating #{application_base} namespace file ..." 
+      template_erb('application.rb.template', "#{application}.rb", 'lib', 'lib')
+
+      puts "Generating #{application_base} service file ..."
+      template_erb('service.rb.template','service.rb','lib',application_source_path)
+      template_erb('version.rb.template','version.rb','lib',application_source_path)
+
+      application_api
+
+      application_rack
+    end
+
+    def application_api
+      puts "Generating application[#{application_base}] api folder ..."
+      api_root = File.join('lib',application,'api')
+      Dir.mkdir(api_root)
+
+      api_template_root = File.join('lib', 'api')
+      puts api_template_root
+      puts "Generating #{application_base} api files ..."
+      template_erb('service.rb.template','service.rb',api_template_root, api_root)
+      template_erb('support.rb.template','support.rb',api_template_root, api_root)
+      template_erb('version.rb.template','version.rb',api_template_root, api_root) 
+    end
+
+    def application_rack
+      puts "Generating application[#{application_base}] rack file ..."
+      template_erb('config.ru.template','config.ru')
     end
 
     def migration_scaffold
