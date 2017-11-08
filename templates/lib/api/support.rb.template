@@ -2,8 +2,6 @@ require 'd13n/support/request_id'
 
 module <%= application_base %>::Api
   class Service < ::Sinatra::Base
-    attr_reader :type, :format
-
     use Rack::RequestId
     set :public_folder, File.join(File.dirname(__FILE__), *%w[.. .. public])
     set :views, File.join(File.dirname(__FILE__), *%w[.. .. views])
@@ -13,7 +11,6 @@ module <%= application_base %>::Api
     before do
       headers 'X-Powered-By' => "<%= application_base %>#{<%= application_base %>::VERSION}"
       headers 'X-Api-Version' => "#{<%= application_base %>::Api::VERSION}"
-      format :json
     end
 
     get "/" do
@@ -22,7 +19,7 @@ module <%= application_base %>::Api
 
     #TODO refactor format handling
     get "/check.?:format?" do
-      {status:ok}.to_json
+      {status: "OK"}.to_json
     end
 
     get "/config.?:format?" do
