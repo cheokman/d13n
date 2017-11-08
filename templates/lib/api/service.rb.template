@@ -3,5 +3,8 @@ module <%= application_base %>::Api
   #
   # define service routes here
   #
+    get '/service' do
+      "Hello Service"
+    end
   end
 end
