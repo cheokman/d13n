@@ -1,7 +1,7 @@
 require 'd13n'
-
+require '<%= application_base %>/version'
 module <%= application_base %>
-  include D13n::Application::ClassMethods
+  # include D13n::Application::ClassMethods
   #
   # D13n defined logger, config and config's default configuration 'default_source' in <%= application_base %>, you can use 
   # <%= application_base %>.config= 
@@ -45,3 +45,6 @@ module <%= application_base %>
   # More information about configuration pls refer config_kit repository: http://stash.mo.laxino.com/users/ben.wu/repos/config_kit/browse 
   # Or Axle Configuration documentation: http://stash.mo.laxino.com/projects/G2/repos/idc_config/browse 
 end
+
+require '<%= application_base %>/service'
+require '<%= application_base %>/api'
