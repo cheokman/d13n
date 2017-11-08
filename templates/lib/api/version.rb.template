@@ -1,0 +1,3 @@
+module <%= application_base %>::Api
+  VERSION = '0.1'
+end

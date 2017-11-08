@@ -1,0 +1,7 @@
+module <%= application_base %>::Api
+  class Service < ::Sinatra::Base
+  #
+  # define service routes here
+  #
+  end
+end

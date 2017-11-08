@@ -1,0 +1,4 @@
+require 'sinatra/base'
+require '<%= application %>/api/version'
+require '<%= application %>/api/support'
+require '<%= application %>/api/service'

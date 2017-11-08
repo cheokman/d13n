@@ -1,0 +1,4 @@
+module <%= application_base %>
+  class Service < D13n::Service
+  end
+end

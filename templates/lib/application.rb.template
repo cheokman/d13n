@@ -1,0 +1,47 @@
+require 'd13n'
+
+module <%= application_base %>
+  include D13n::Application::ClassMethods
+  #
+  # D13n defined logger, config and config's default configuration 'default_source' in <%= application_base %>, you can use 
+  # <%= application_base %>.config= 
+  # <%= application_base %>.logger= 
+  # to assign another configurator or logger.
+  #   
+  # To config default configuration, you can use 
+  # <%= application_base %>.default_source=
+  # to assign some default configuration in application start. To define the default configuration, 
+  # <%= application_base %>.default_source = {
+  #    :'service.broker.host' => {
+  #        :default => 'localhost',
+  #        :public => true,
+  #        :type => String,
+  #        :allowed_from_server => true,
+  #        :description => 'Broker Host Name.'
+  #    },
+  #    :'service.broker.port' => {
+  #        :default => '61614',
+  #        :public => true,
+  #        :type => String,
+  #        :allowed_from_server => true,
+  #        :description => 'Broker Host Port.'
+  #    },
+  #    :'service.broker.username' => {
+  #        :default => 'laxino_service',
+  #        :public => true,
+  #        :type => String,
+  #        :allowed_from_server => true,
+  #        :description => 'Broker Host Service Username.'
+  #    },
+  #    :'service.broker.password' => {
+  #        :default => 'laxino_service',
+  #        :public => true,
+  #        :type => String,
+  #        :allowed_from_server => true,
+  #        :description => 'Broker Host Password.'
+  #    }
+  #   }
+  #   
+  # More information about configuration pls refer config_kit repository: http://stash.mo.laxino.com/users/ben.wu/repos/config_kit/browse 
+  # Or Axle Configuration documentation: http://stash.mo.laxino.com/projects/G2/repos/idc_config/browse 
+end
