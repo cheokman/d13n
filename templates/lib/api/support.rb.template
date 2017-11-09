@@ -23,7 +23,7 @@ module <%= application_base %>::Api
     end
 
     get "/config.?:format?" do
-      <%= application_base %>.config.to_collector_hash.to_json
+      <%= application_base %>.config.to_json
     end
   end
 end
