@@ -111,6 +111,10 @@ module D13n::Cli
       application_api
 
       application_rack
+
+      application_readme
+
+      application_guard
     end
 
     def application_api
@@ -132,6 +136,16 @@ module D13n::Cli
     def application_rack
       puts "Generating application[#{application_base}] rack file ..."
       template_erb('config.ru.template','config.ru')
+    end
+
+    def application_readme
+      puts "Generating application[#{application_base}] README.md file ..."
+      template_erb('README.md.template','README.md')
+    end
+
+    def application_guard
+      puts "Generating application[#{application_base}] README.md file ..."
+      template_erb('Guardfile.template','Guardfile')
     end
 
     def migration_scaffold
