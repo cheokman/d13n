@@ -21,15 +21,14 @@ module D13n
       end
 
       def app_name
-        @app_name ||= app_class.name
+        @app_name ||= app_class.name.underscore
       end
 
       def inherited(descendant)
         raise ServiceError, "You cannot have more than one D13n::Service" if D13n.service
         descendant.app_class.extend Application::ClassMethods
         D13n.application = descendant.app_class
-        # D13n.extend Application::ClassMethods
-        D13n.service = descendant.instance
+        D13n.service = descendant
       end
 
     end
