@@ -1,5 +1,5 @@
 require 'd13n/version'
-#require 'logger'
+
 module D13n
   class D13nError < StandardError;end
   
@@ -8,17 +8,17 @@ module D13n
       @config ||= {}
     end
 
-    # def config
-    #   @config ||= D13n::Configuration::Manager.new
-    # end
+    def config
+      @config ||= D13n::Configuration::Manager.new
+    end
 
-    # def logger
-    #   @logger ||= D13n::Logger::StartupLogger.instance
-    # end
+    def logger
+      @logger ||= D13n::Logger::StartupLogger.instance
+    end
 
-    # def logger=(log)
-    #   @logger = log
-    # end
+    def logger=(log)
+      @logger = log
+    end
 
     # def opt_state
     #   D13n::Api::OperationState.opt_get
@@ -45,6 +45,7 @@ module D13n
     end
   end
 end
-
+require 'd13n/logger'
+require 'd13n/configuration'
 require 'd13n/application'
 require 'd13n/service'
