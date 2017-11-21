@@ -29,7 +29,7 @@ module D13n
     end
 
     def service
-      threaded[:service] ||= nil
+      threaded[:service] ||= D13n::Service
     end
 
     def service=(srv)
@@ -37,15 +37,24 @@ module D13n
     end
 
     def application
-      threaded[:application] ||= nil
+      threaded[:application] ||= self
     end
 
     def application=(app)
       threaded[:application] = app
     end
+
+    def app_name
+      service.instance.app_name
+    end
+
+    def app_prefix
+      app_name.upcase
+    end
   end
 end
-require 'd13n/logger'
-require 'd13n/configuration'
 require 'd13n/application'
 require 'd13n/service'
+require 'd13n/logger'
+require 'd13n/configuration'
+
