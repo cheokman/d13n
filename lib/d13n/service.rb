@@ -25,6 +25,7 @@ module D13n
       end
 
       def inherited(descendant)
+        return if descendant == self
         raise ServiceError, "You cannot have more than one D13n::Service" if D13n.service
         descendant.app_class.extend Application::ClassMethods
         D13n.application = descendant.app_class
