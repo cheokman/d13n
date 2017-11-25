@@ -13,15 +13,14 @@ describe D13n::Configuration::DefaultSource do
       },
     }
 
-    module FakeApp;end
-    module FakeApp
-      class Service < D13n::Service;end
-    end
+    allow(D13n).to receive(:app_name).and_return('fake_app')
   end
 
   describe '.deafults=' do
     before :each do
+
       described_class.defaults=@default_source
+      allow_any_instance_of(described_class).to receive(:frozen_default)
     end
 
     it 'can add application default source' do
@@ -35,7 +34,7 @@ describe D13n::Configuration::DefaultSource do
       it { 
            allow(D13n.service.instance).to receive(:root).and_return(false)
            allow(ENV).to receive(:[]).with("HOME").and_return(false)
-           is_expected.to be_eql(["config/fake_app.yml","fake_app.yml"])
+           is_expected.to be_eql(["config/d13n.yml","d13n.yml"])
          }
     end
 
@@ -43,7 +42,7 @@ describe D13n::Configuration::DefaultSource do
       it {
         allow(D13n.service.instance).to receive(:root).and_return('/root')
         allow(ENV).to receive(:[]).with("HOME").and_return(false)
-        is_expected.to be_eql(["config/fake_app.yml","fake_app.yml","/root/config/fake_app.yml","/root/fake_app.yml"])
+        is_expected.to be_eql(["config/d13n.yml","d13n.yml","/root/config/d13n.yml","/root/d13n.yml"])
       }
     end
 
@@ -51,12 +50,12 @@ describe D13n::Configuration::DefaultSource do
       it {
         allow(D13n.service.instance).to receive(:root).and_return('/root')
         allow(ENV).to receive(:[]).with("HOME").and_return('/home/user')
-        is_expected.to be_eql(["config/fake_app.yml",
-                                      "fake_app.yml",
-                             "/root/config/fake_app.yml",
-                                    "/root/fake_app.yml",
-                     "/home/user/.fake_app/fake_app.yml",
-                           "/home/user/fake_app.yml"])
+        is_expected.to be_eql(["config/d13n.yml",
+                                      "d13n.yml",
+                             "/root/config/d13n.yml",
+                                    "/root/d13n.yml",
+                     "/home/user/.d13n/d13n.yml",
+                           "/home/user/d13n.yml"])
       }
     end
   end

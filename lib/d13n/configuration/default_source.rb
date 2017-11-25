@@ -57,18 +57,18 @@ module D13n::Configuration
     def self.config_search_paths
       Proc.new {
         paths = [
-            File.join("config", "#{D13n.service.app_name}.yml"),
-            File.join("#{D13n.service.app_name}.yml")
+            File.join("config", "d13n.yml"),
+            File.join("d13n.yml")
         ]
 
         if D13n.service.instance.root
-          paths << File.join(D13n.service.instance.root, "config", "#{D13n.service.app_name}.yml")
-          paths << File.join(D13n.service.instance.root, "#{D13n.service.app_name}.yml")
+          paths << File.join(D13n.service.instance.root, "config", "d13n.yml")
+          paths << File.join(D13n.service.instance.root, "d13n.yml")
         end
 
         if ENV["HOME"]
-          paths << File.join(ENV["HOME"], ".#{D13n.service.instance.app_name}", "#{D13n.service.instance.app_name}.yml")
-          paths << File.join(ENV["HOME"], "#{D13n.service.instance.app_name}.yml")
+          paths << File.join(ENV["HOME"], ".d13n", "d13n.yml")
+          paths << File.join(ENV["HOME"], "d13n.yml")
         end
         paths
       }
