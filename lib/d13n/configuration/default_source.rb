@@ -129,7 +129,7 @@ module D13n::Configuration
           :description => 'Defines a path to the log file, excluding the filename.'
       },
       :log_file_name => {
-          :default => 'axle.log',
+          :default => 'd13n.log',
           :public => true,
           :type => String,
           :description => 'Defines a name for the log file.'
@@ -141,7 +141,7 @@ module D13n::Configuration
           :default => DefaultSource.config_path,
           :public => true,
           :type => String,
-          :description => 'Path to <b>axle.yml</b>. If undefined, the agent checks the following directories (in order): <b>config/axle.yml</b>, <b>axle.yml</b>, <b>$HOME/.axle/axle.yml</b> and <b>$HOME/axle.yml</b>.'
+          :description => 'Path to <b>d13n.yml</b>. If undefined, the agent checks the following directories (in order): <b>config/d13n.yml</b>, <b>d13n.yml</b>, <b>$HOME/.d13n/d13n.yml</b> and <b>$HOME/d13n.yml</b>.'
       },
       :config_search_paths => {
           :default => DefaultSource.config_search_paths,
