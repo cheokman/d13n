@@ -12,8 +12,8 @@ module D13n
       end
 
       def run!(opts)
-        D13n.service.init_service(opts)
-        D13n.service.start
+        D13n.service.instance.init_service(opts)
+        D13n.service.instance.start
       end
 
       def app_class
