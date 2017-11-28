@@ -155,7 +155,7 @@ module D13n
     end
 
     def set_log_format!
-      @prefix = log_stdout? ? "** [#{D13n.config.app_name}]" : ''
+      @prefix = log_stdout? ? "** [#{D13n.config[:app_name].capitalize}]" : ''
       @log.formatter = 
       if log_format == 'json'
         Proc.new do |severity, timestamp, progname, msg|

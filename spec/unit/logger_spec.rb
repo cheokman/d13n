@@ -89,14 +89,14 @@ describe D13n::Logger do
         end
       end
 
-      context 'when log file /fake/path/axle.log found or created' do
+      context 'when log file /fake/path/d13n.log found or created' do
         before(:each) {
           allow(@logger).to receive(:find_or_create_file_path).and_return('/fake/path')
           allow(::Logger).to receive(:new)
           @logger.send(:create_log_to_file,"root")
         }
         it 'can create a log file' do
-          expect(::Logger).to have_received(:new).with('/fake/path/axle.log')
+          expect(::Logger).to have_received(:new).with('/fake/path/d13n.log')
         end
       end
 
@@ -201,10 +201,10 @@ describe D13n::Logger do
       before(:each) {
         allow(@logger).to receive(:log_stdout?).and_return(true)
       }
-      it 'log with prefix "** [Axle]"' do
-        allow(D13n.config).to receive(:app_name).and_return("Axle")
+      it 'log with prefix "** [D13n]"' do
+        allow(D13n.config).to receive(:app_name).and_return("d13n")
         @logger.send(:set_log_format!)
-        expect(@logger.instance_variable_get(:@prefix)).to be_eql('** [Axle]')
+        expect(@logger.instance_variable_get(:@prefix)).to be_eql('** [D13n]')
       end
     end
 
@@ -222,7 +222,7 @@ describe D13n::Logger do
     describe 'fomatter' do
       before(:each) {
         allow(@logger).to receive(:log_stdout?).and_return(true)
-        allow(D13n.config).to receive(:app_name).and_return("Axle")
+        allow(D13n.config).to receive(:app_name).and_return("D13n")
         allow(@logger).to receive(:request_id).and_return('request')
       }
 
@@ -239,25 +239,25 @@ describe D13n::Logger do
 
         it 'can return message with string type' do
           @logger.send(:set_log_format!)
-          log_data = {app: "Axle", 
+          log_data = {app: "D13n", 
                        ts: ts.strftime("%F %H:%M:%S %z"),
                        pid: $$,
                        severity: severity,
                        request_id: 'request',
                        message: st_msg
                      }
-          expect(@logger.formatter.call(severity,ts, 'axle', st_msg)).to be_eql("#{log_data.to_json}\n")
+          expect(@logger.formatter.call(severity,ts, 'd13n', st_msg)).to be_eql("#{log_data.to_json}\n")
         end
 
         it 'can return message with string type' do
           @logger.send(:set_log_format!)
-          log_data = {app: "Axle", 
+          log_data = {app: "D13n", 
                        ts: ts.strftime("%F %H:%M:%S %z"),
                        pid: $$,
                        severity: severity,
                        request_id: 'request'
                      }.merge! hs_msg
-          expect(@logger.formatter.call(severity,ts, 'axle', hs_msg)).to be_eql("#{log_data.to_json}\n")
+          expect(@logger.formatter.call(severity,ts, 'd13n', hs_msg)).to be_eql("#{log_data.to_json}\n")
         end
       end
 
@@ -268,8 +268,8 @@ describe D13n::Logger do
 
         it 'can return log string' do
           @logger.send(:set_log_format!)
-          log_data = "** [Axle][#{ts.strftime("%F %H:%M:%S %z")} (#{$$})] #{severity} request : #{st_msg}\n"
-          expect(@logger.formatter.call(severity,ts, 'axle', st_msg)).to be_eql(log_data)
+          log_data = "** [D13n][#{ts.strftime("%F %H:%M:%S %z")} (#{$$})] #{severity} request : #{st_msg}\n"
+          expect(@logger.formatter.call(severity,ts, 'd13n', st_msg)).to be_eql(log_data)
         end
       end
     end
