@@ -11,6 +11,7 @@ module <%= application_base %>::Api
     before do
       headers 'X-Powered-By' => "<%= application_base %>#{<%= application_base %>::VERSION}"
       headers 'X-Api-Version' => "#{<%= application_base %>::Api::VERSION}"
+      D13n::Operation::State.opt_get.request_info = request_info
     end
 
     get "/" do
@@ -24,6 +25,14 @@ module <%= application_base %>::Api
 
     get "/config.?:format?" do
       <%= application_base %>.config.to_json
+    end
+
+    def request_info
+      {
+             "host" => request.host,
+               "ip" => request.ip,
+       "request_id" => env['HTTP_X_REQUEST_ID']
+      }
     end
   end
 end

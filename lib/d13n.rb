@@ -16,9 +16,9 @@ module D13n
       @logger = log
     end
 
-    # def opt_state
-    #   D13n::Api::OperationState.opt_get
-    # end
+    def opt_state
+      D13n::Api::OperationState.opt_get
+    end
 
     def threaded
       Thread.current[:d13n] ||= {}
