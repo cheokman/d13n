@@ -1,10 +1,4 @@
-require 'd13n/configuration/mask_defaults'
-require 'd13n/configuration/dotted_hash'
-require 'd13n/configuration/default_source'
-require 'd13n/configuration/environment_source'
-require 'd13n/configuration/yaml_source'
-require 'd13n/configuration/server_source'
-require 'd13n/configuration/manual_source'
+
 module D13n::Configuration
   class Manager
     def [](key)
@@ -231,3 +225,11 @@ module D13n::Configuration
 
   end
 end
+
+require 'd13n/configuration/mask_defaults'
+require 'd13n/configuration/dotted_hash'
+require 'd13n/configuration/default_source'
+require 'd13n/configuration/yaml_source'
+require 'd13n/configuration/environment_source'
+require 'd13n/configuration/server_source'
+require 'd13n/configuration/manual_source'
