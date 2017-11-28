@@ -2,6 +2,7 @@ module D13n::Application
   module ClassMethods
     def self.extended(descendant)
       D13n.application = descendant
+      D13n.config = D13n::Configuration::Manager.new
     end
 
     def config
