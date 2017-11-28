@@ -20,18 +20,11 @@ module D13n
         @app_kls ||= Object.const_get(name.split("::").first)
       end
 
-      def app_name
-        @app_name ||= app_class.name.underscore
-      end
-
       def inherited(descendant)
-        return if descendant == self
-        raise ServiceError, "You cannot have more than one D13n::Service" if D13n.service
+        raise ServiceError, "You cannot have more than one D13n::Service" if D13n.service && descendant == D13n::Service
         descendant.app_class.extend Application::ClassMethods
-        D13n.application = descendant.app_class
         D13n.service = descendant
       end
-
     end
 
     attr_reader :service_conf, :env, :service_prefix
@@ -42,13 +35,13 @@ module D13n
 
     def init_service(opts)
       determine_service_conf(opts)
-      # determine_env(opts)
+      determine_env(opts)
 
-      # config_service(opts)
+      config_service(opts)
 
-      # if D13n.logger.is_startup_logger?
-      #   D13n.logger = D13n::Logger.new(root,opts.delete(:logger))
-      # end
+      if D13n.logger.is_startup_logger?
+        D13n.logger = D13n::Logger.new(root,opts.delete(:logger))
+      end
     end
 
     def determine_service_conf(opt)
@@ -61,10 +54,10 @@ module D13n
       @env = opt.fetch(:env, default_env).to_s
     end
 
-    # def config_service(opts)
-    #   config_file_path = D13n.config[:config_path]
-    #   D13n.config.replace_or_add_config(D13n::Configuration::YamlSource.new(config_file_path, env))
-    # end
+    def config_service(opts)
+      config_file_path = D13n.config[:config_path]
+      D13n.config.replace_or_add_config(D13n::Configuration::YamlSource.new(config_file_path, env))
+    end
 
     def started?
       @started
@@ -74,27 +67,19 @@ module D13n
       @root = ENV['SERVICE_ROOT'] || '.'
     end
 
-    # def settings
-    #   D13n.config.to_collecter_hash
-    # end
+    def settings
+      D13n.config.to_collecter_hash
+    end
 
     def start
       return if started?
-      # log_startup
+      log_startup
       start_api_service
-    end
-
-    def app_name
-      self.class.app_name
-    end
-
-    def app_prefix
-      app_name.upcase
     end
     
   private
     def default_env
-      ENV["#{app_prefix}_ENV"] || ENV['RACK_ENV'] || 'development'
+      ENV["#{D13n.app_prefix}_ENV"] || ENV['RACK_ENV'] || 'development'
     end
   end
 end
