@@ -185,7 +185,7 @@ module D13n
     end
 
     def state
-      D13n.opt_state
+      D13n::Operation::State.opt_get
     end
     
     def request_id
