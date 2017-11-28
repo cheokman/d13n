@@ -16,17 +16,17 @@ describe D13n::Configuration::DefaultSource do
     allow(D13n).to receive(:app_name).and_return('fake_app')
   end
 
-  describe '.deafults=' do
-    before :each do
+  # describe '.deafults=' do
+  #   before :each do
 
-      described_class.defaults=@default_source
-      allow_any_instance_of(described_class).to receive(:frozen_default)
-    end
+  #     described_class.defaults=@default_source
+  #     allow_any_instance_of(described_class).to receive(:frozen_default)
+  #   end
 
-    it 'can add application default source' do
-      expect(described_class.defaults).to include @default_source
-    end
-  end
+  #   it 'can add application default source' do
+  #     expect(described_class.defaults).to include @default_source
+  #   end
+  # end
 
   describe '#config_search_paths' do
     subject {described_class.config_search_paths.call}
@@ -34,7 +34,7 @@ describe D13n::Configuration::DefaultSource do
       it { 
            allow(D13n.service.instance).to receive(:root).and_return(false)
            allow(ENV).to receive(:[]).with("HOME").and_return(false)
-           is_expected.to be_eql(["config/d13n.yml","d13n.yml"])
+           is_expected.to be_eql(["config/fake_app.yml","fake_app.yml"])
          }
     end
 
@@ -42,7 +42,7 @@ describe D13n::Configuration::DefaultSource do
       it {
         allow(D13n.service.instance).to receive(:root).and_return('/root')
         allow(ENV).to receive(:[]).with("HOME").and_return(false)
-        is_expected.to be_eql(["config/d13n.yml","d13n.yml","/root/config/d13n.yml","/root/d13n.yml"])
+        is_expected.to be_eql(["config/fake_app.yml","fake_app.yml","/root/config/fake_app.yml","/root/fake_app.yml"])
       }
     end
 
@@ -50,12 +50,12 @@ describe D13n::Configuration::DefaultSource do
       it {
         allow(D13n.service.instance).to receive(:root).and_return('/root')
         allow(ENV).to receive(:[]).with("HOME").and_return('/home/user')
-        is_expected.to be_eql(["config/d13n.yml",
-                                      "d13n.yml",
-                             "/root/config/d13n.yml",
-                                    "/root/d13n.yml",
-                     "/home/user/.d13n/d13n.yml",
-                           "/home/user/d13n.yml"])
+        is_expected.to be_eql(["config/fake_app.yml",
+                                      "fake_app.yml",
+                             "/root/config/fake_app.yml",
+                                    "/root/fake_app.yml",
+                     "/home/user/.fake_app/fake_app.yml",
+                           "/home/user/fake_app.yml"])
       }
     end
   end

@@ -57,18 +57,18 @@ module D13n::Configuration
     def self.config_search_paths
       Proc.new {
         paths = [
-            File.join("config", "d13n.yml"),
-            File.join("d13n.yml")
+            File.join("config", "#{D13n.app_name}.yml"),
+            File.join("#{D13n.app_name}.yml")
         ]
 
         if D13n.service.instance.root
-          paths << File.join(D13n.service.instance.root, "config", "d13n.yml")
-          paths << File.join(D13n.service.instance.root, "d13n.yml")
+          paths << File.join(D13n.service.instance.root, "config", "#{D13n.app_name}.yml")
+          paths << File.join(D13n.service.instance.root, "#{D13n.app_name}.yml")
         end
 
         if ENV["HOME"]
-          paths << File.join(ENV["HOME"], ".d13n", "d13n.yml")
-          paths << File.join(ENV["HOME"], "d13n.yml")
+          paths << File.join(ENV["HOME"], ".#{D13n.app_name}", "#{D13n.app_name}.yml")
+          paths << File.join(ENV["HOME"], "#{D13n.app_name}.yml")
         end
         paths
       }
@@ -101,6 +101,13 @@ module D13n::Configuration
   end
 
   DEFAULTS = {
+      :app_name => {
+        :default => "#{D13n.app_name}",
+        :public => true,
+        :type => String,
+        :allowed_from_server => false,
+        :description => 'Define Application Name'
+      },
       :port => {
           :default => 3000,
           :public => true,
