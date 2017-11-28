@@ -1,27 +1,33 @@
 require 'd13n/version'
 
+
 module D13n
   class D13nError < StandardError;end
   
   class << self
     def config
-      @config ||= D13n::Configuration::Manager.new
+      threaded[:config] ||= D13n::Configuration::Manager.new
+    end
+
+    def config=(cfg)
+      threaded[:config] = cfg
     end
 
     def logger
-      @logger ||= D13n::Logger::StartupLogger.instance
+      threaded[:logger] ||= D13n::Logger::StartupLogger.instance
     end
 
     def logger=(log)
-      @logger = log
+     threaded[:logger] = log
     end
 
-    def opt_state
-      D13n::Api::OperationState.opt_get
-    end
+    # def opt_state
+    #   D13n::Operation::State
+    # end
 
     def threaded
-      Thread.current[:d13n] ||= {}
+      @threaded ||= {}
+      #Thread.current[:d13n] ||= {}
     end
 
     def service
@@ -38,6 +44,8 @@ module D13n
 
     def application=(app)
       threaded[:application] = app
+      threaded[:app_name] = nil
+      threaded[:app_prefix] = nil
     end
 
     def app_name
@@ -50,6 +58,8 @@ module D13n
   end
 end
 
+require 'd13n/ext/string'
+require 'd13n/operation'
 require 'd13n/logger'
 require 'd13n/configuration'
 require 'd13n/application'
