@@ -4,6 +4,9 @@ require 'd13n/application/class_methods'
 describe D13n::Application::ClassMethods do
   before(:each) do
     @fake_app = Class.new {
+      def self.name
+        "FakeApp"
+      end
       extend D13n::Application::ClassMethods
     }
     @fake_app.reset
