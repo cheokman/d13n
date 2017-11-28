@@ -1,6 +1,6 @@
 require 'd13n/operation/traced_stack'
 module D13n::Operation
-  class StateError < D13n::AxleError;end
+  class StateError < D13n::D13nError;end
 
   class State
     def self.opt_get
