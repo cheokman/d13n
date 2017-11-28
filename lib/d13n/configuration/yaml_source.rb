@@ -1,3 +1,4 @@
+require 'yaml'
 module D13n::Configuration
   class YamlSource < DottedHash
     attr_accessor :file_path, :failures
