@@ -23,8 +23,8 @@ module <%= application_base %>::Api
       {status: "OK"}.to_json
     end
 
-    get "/config.?:format?" do
-      <%= application_base %>.config.to_json
+    get "/config" do
+      <%= application_base %>.config.to_collector_hash.to_json
     end
 
     def request_info
