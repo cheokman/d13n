@@ -52,7 +52,7 @@ module D13n::Cli
 
       makefile_scaffold
 
-      d13n_yml_scaffold
+      application_yml_scaffold
 
       docker_scaffold
 
@@ -191,10 +191,10 @@ module D13n::Cli
     end
 
     def application_yml_scaffold
-      puts "Generating d13n.yml ..."
-      File.open(File.join(@template_home, 'd13n.yml.template')) do |tfh|
+      puts "Generating #{application}.yml ..."
+      File.open(File.join(@template_home, 'application.yml.template')) do |tfh|
         erb = ERB.new(tfh.read)
-        File.open(File.join(@current_home, "d13n.yml"), 'w') do |ofh|
+        File.open(File.join(@current_home, "#{application}.yml"), 'w') do |ofh|
           ofh.print erb.result(binding)
         end
       end
