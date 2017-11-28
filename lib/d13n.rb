@@ -5,10 +5,6 @@ module D13n
   
   class << self
     def config
-      @config ||= {}
-    end
-
-    def config
       @config ||= D13n::Configuration::Manager.new
     end
 
@@ -45,16 +41,18 @@ module D13n
     end
 
     def app_name
-      service.instance.app_name
+      threaded[:app_name] ||= application.name.underscore
     end
 
     def app_prefix
-      app_name.upcase
+      threaded[:app_prefix] ||= app_name.upcase
     end
   end
 end
-require 'd13n/application'
-require 'd13n/service'
+
 require 'd13n/logger'
 require 'd13n/configuration'
+require 'd13n/application'
+require 'd13n/service'
+
 
