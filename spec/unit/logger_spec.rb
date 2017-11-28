@@ -91,6 +91,7 @@ describe D13n::Logger do
 
       context 'when log file /fake/path/d13n.log found or created' do
         before(:each) {
+          allow(D13n).to receive(:app_name).and_return('d13n')
           allow(@logger).to receive(:find_or_create_file_path).and_return('/fake/path')
           allow(::Logger).to receive(:new)
           @logger.send(:create_log_to_file,"root")
