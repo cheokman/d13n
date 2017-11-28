@@ -136,7 +136,7 @@ module D13n::Configuration
           :description => 'Defines a path to the log file, excluding the filename.'
       },
       :log_file_name => {
-          :default => 'd13n.log',
+          :default => Proc.new{"#{D13n.app_name}.log"},
           :public => true,
           :type => String,
           :description => 'Defines a name for the log file.'
@@ -148,7 +148,7 @@ module D13n::Configuration
           :default => DefaultSource.config_path,
           :public => true,
           :type => String,
-          :description => 'Path to <b>d13n.yml</b>. If undefined, the agent checks the following directories (in order): <b>config/d13n.yml</b>, <b>d13n.yml</b>, <b>$HOME/.d13n/d13n.yml</b> and <b>$HOME/d13n.yml</b>.'
+          :description => 'Path to <b>application.yml</b>. If undefined, the agent checks the following directories (in order): <b>config/application.yml</b>, <b>application.yml</b>, <b>$HOME/.d13n/application.yml</b> and <b>$HOME/application.yml</b>.'
       },
       :config_search_paths => {
           :default => DefaultSource.config_search_paths,
