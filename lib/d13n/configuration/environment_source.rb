@@ -2,7 +2,6 @@ module D13n::Configuration
   class EnvironmentSource < DottedHash
     SUPPORTED_PREFIXES = Proc.new {/^#{D13n.app_name}_/i}
     SPECIAL_CASE_KEYS  = [
-    #      'AXLE_ENV', # read by Ruby
           "#{D13n.app_prefix}_LOG"  # read by set_log_file
         ]
 
