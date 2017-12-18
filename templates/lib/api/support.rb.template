@@ -19,7 +19,7 @@ module <%= application_base %>::Api
     end
 
     #TODO refactor format handling
-    get "/check.?:format?" do
+    get "/check" do
       {status: "OK"}.to_json
     end
 

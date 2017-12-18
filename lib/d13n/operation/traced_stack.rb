@@ -11,8 +11,6 @@ module D13n::Operation
   end
 
   class TracedStack
-    
-
     def initialize
       @stack = []
     end
