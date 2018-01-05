@@ -191,10 +191,10 @@ module D13n::Cli
     end
 
     def application_yml_scaffold
-      puts "Generating #{@application}.yml ..."
+      puts "Generating #{application}.yml ..."
       File.open(File.join(@template_home, 'application.yml.template')) do |tfh|
         erb = ERB.new(tfh.read)
-        File.open(File.join(@current_home, "#{@application}.yml"), 'w') do |ofh|
+        File.open(File.join(@current_home, "#{application}.yml"), 'w') do |ofh|
           ofh.print erb.result(binding)
         end
       end

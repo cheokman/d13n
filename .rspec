@@ -1,0 +1,6 @@
+--format Fuubar
+--color
+--format html
+--out reports/rspec/result.html
+--format json
+--out reports/rspec/result.json

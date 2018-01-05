@@ -13,6 +13,7 @@ group :test do
   gem 'simplecov', '0.12.0'
   gem 'rspec'
   gem 'rspec-nc'
+  gem 'fuubar'
   gem 'factory_bot'
   gem 'rack-test'
   gem 'faker'

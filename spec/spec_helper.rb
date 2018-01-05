@@ -7,7 +7,7 @@ SimpleCov.start do
 end
 
 require 'faker'
-require 'factory_girl'
+require 'factory_bot'
 require 'as-duration'
 require 'd13n'
 
@@ -35,9 +35,9 @@ RSpec.configure do |config|
   # config.before(:each) do
   #   DatabaseCleaner.strategy = :transaction
   # end
-  # config.before(:each) do
-    #Axle.logger = Axle::Logger::SilenceLogger.new
-  # end
+  config.before(:each) do
+    D13n.logger = D13n::Logger::SilenceLogger.new
+  end
 
   # config.before(:each) do
   #   # open transaction
@@ -49,9 +49,9 @@ RSpec.configure do |config|
   #   DatabaseCleaner.clean
   # end
 
-  FactoryGirl.find_definitions
+  FactoryBot.find_definitions
   config.profile_examples = 3
 
-  config.include FactoryGirl::Syntax::Methods
+  config.include FactoryBot::Syntax::Methods
 end
 
