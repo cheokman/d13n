@@ -102,7 +102,7 @@ module D13n::Configuration
 
   DEFAULTS = {
       :app_name => {
-        :default => "#{D13n.app_name}",
+        :default => Proc.new{"#{D13n.app_name}"},
         :public => true,
         :type => String,
         :allowed_from_server => false,
