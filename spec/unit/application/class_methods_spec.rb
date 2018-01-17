@@ -20,10 +20,6 @@ describe D13n::Application::ClassMethods do
     expect(@fake_app.application).to be_eql(@fake_app)
   end
 
-  it 'access config as D13n.config' do
-    expect(@fake_app.config).to be_eql(D13n.config)
-  end
-
   it 'can change config' do
     fake_config = double()
     @fake_app.config = fake_config

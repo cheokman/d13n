@@ -1,6 +1,7 @@
 require 'd13n'
 require '<%= application %>/version'
 module <%= application_base %>
+  extend D13n::Application::ClassMethods
   # D13n defined logger, config and config's default configuration 'default_source' in <%= application_base %>, you can use 
   # <%= application_base %>.config= 
   # <%= application_base %>.logger= 
