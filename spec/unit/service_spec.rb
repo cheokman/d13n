@@ -162,4 +162,26 @@ describe D13n::Service do
       end
     end
   end
+
+  describe 'root' do
+    before(:each) do
+      @instance = FakeApp::Service.new
+    end
+
+    describe 'when SERVICE_ROOT env set' do
+      before(:each) do
+        allow(ENV).to receive(:[]).with('SERVICE_ROOT').and_return('/service')
+      end
+
+      it 'should return SERIVCE_ROOT' do
+        expect(@instance.root).to be_eql('/service')
+      end
+    end
+
+    describe 'when SERVICE_ROOT env not set' do
+      it 'should return default .' do
+        expect(@instance.root).to be_eql('.')
+      end
+    end
+  end
 end
