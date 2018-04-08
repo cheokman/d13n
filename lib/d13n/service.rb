@@ -12,7 +12,7 @@ module D13n
       end
 
       def run!(opts)
-        D13n.service.instance.init_service(opts)
+        D13n.service.instance.init(opts)
         D13n.service.instance.start
       end
 
@@ -27,13 +27,13 @@ module D13n
       end
     end
 
-    attr_reader :service_conf, :env, :service_prefix
+    attr_reader :service_conf, :env, :service_prefix, :started
     def initialize()
       @started=false
-      @app_prefix = D13n.service.class.name.underscore.upcase
+      @service_prefix = D13n.service.app_class.name.underscore.upcase
     end
 
-    def init_service(opts)
+    def init(opts)
       determine_service_conf(opts)
       determine_env(opts)
 
@@ -44,14 +44,21 @@ module D13n
       end
     end
 
-    def determine_service_conf(opt)
-      @service_conf ||= {}
-      @service_conf[:port] = opt.fetch(:port, 3000)
-      @service_conf[:bind] = opt.fetch(:host, 'localhost')
+    def start
+      return if started?
+      log_startup
+      query_server_for_configuration
+      start_api_service
     end
 
-    def determine_env(opt)
-      @env = opt.fetch(:env, default_env).to_s
+    def determine_service_conf(opts={})
+      @service_conf ||= {}
+      @service_conf[:port] = opts.fetch(:port, 3000)
+      @service_conf[:bind] = opts.fetch(:host, 'localhost')
+    end
+
+    def determine_env(opts={})
+      @env = opts.fetch(:env, default_env).to_s
     end
 
     def config_service(opts)
@@ -71,11 +78,7 @@ module D13n
       D13n.config.to_collecter_hash
     end
 
-    def start
-      return if started?
-      log_startup
-      start_api_service
-    end
+    
     
   private
     def default_env
