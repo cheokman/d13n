@@ -11,6 +11,10 @@ describe D13n::Application::ClassMethods do
     }
     @fake_app.reset
   end
+  
+  it 'shoule have D13n Configurator' do
+    expect(@fake_app.config).to be_kind_of D13n::Configuration::Manager
+  end
 
   it 'assign self as application in D13n' do
     expect(D13n.application).to be_eql(@fake_app)
@@ -20,6 +24,14 @@ describe D13n::Application::ClassMethods do
     expect(@fake_app.application).to be_eql(@fake_app)
   end
 
+  it 'should have fake_app name' do
+    expect(@fake_app.app_name).to be_eql('fake_app')
+  end
+
+  it 'should have FAKE_APP prefix' do
+    expect(@fake_app.app_prefix).to be_eql('FAKE_APP')
+  end
+  
   it 'can change config' do
     fake_config = double()
     @fake_app.config = fake_config
