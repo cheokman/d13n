@@ -36,9 +36,11 @@ module D13n
     def init(opts)
       determine_service_conf(opts)
       determine_env(opts)
-
       config_service(opts)
+      determine_logger(opts)
+    end
 
+    def determine_logger(opts)
       if D13n.logger.is_startup_logger?
         D13n.logger = D13n::Logger.new(root,opts.delete(:logger))
       end
@@ -78,8 +80,6 @@ module D13n
       D13n.config.to_collecter_hash
     end
 
-    
-    
   private
     def default_env
       ENV["#{D13n.app_prefix}_ENV"] || ENV['RACK_ENV'] || 'development'
