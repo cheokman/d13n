@@ -2,7 +2,7 @@ require 'd13n/ext/string'
 require 'd13n/service/start'
 module D13n
   class Service
-    class ServiceError < D13nError; end
+    class ServiceError < Error; end
     class ServiceStartError < ServiceError; end
 
     include Start

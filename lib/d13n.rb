@@ -2,7 +2,7 @@ require 'd13n/version'
 
 
 module D13n
-  class D13nError < StandardError;end
+  class Error < StandardError;end
   
   class << self
     def config
@@ -58,6 +58,14 @@ module D13n
 
     def app_prefix
       threaded[:app_prefix] ||= app_name.upcase
+    end
+
+    def idc_name
+      config[:'idc.name'] || 'hqidc'
+    end
+
+    def idc_env
+      config[:'idc.env'] || 'dev'
     end
   end
 end

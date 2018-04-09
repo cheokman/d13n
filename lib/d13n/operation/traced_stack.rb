@@ -1,5 +1,5 @@
 module D13n::Operation
-  class UnexpectedStackError < D13n::D13nError;end
+  class UnexpectedStackError < D13n::Error;end
   class StackFrame
     attr_reader :tag
     attr_accessor :name, :start_time, :children_time, :end_time
