@@ -1,7 +1,7 @@
 source 'http://gems.sd.laxino.com'
 
 gem 'config_kit'
-
+gemspec
 group :development do
   gem 'guard'
   gem 'guard-rspec', require: false
