@@ -10,7 +10,7 @@ group :development do
 end
 
 group :test do
-  gem 'simplecov', '0.12.0'
+  gem 'simplecov', '0.16.0'
   gem 'rspec'
   gem 'rspec-nc'
   gem 'fuubar'
