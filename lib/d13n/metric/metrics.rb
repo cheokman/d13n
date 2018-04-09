@@ -1,3 +1,4 @@
+require 'd13n/metric/helper'
 require 'd13n/metric/metrics/base'
 require 'd13n/metric/metrics/app_database_metric'
 require 'd13n/metric/metrics/app_http_metric'
