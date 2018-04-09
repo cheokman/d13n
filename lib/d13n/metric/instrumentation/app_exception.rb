@@ -32,7 +32,7 @@ D13n::Metric::Instrumentation::Conductor.direct do
           metric = manager.metric(:app_state)
           
           if metric.nil?
-            Axle.logger.info "Null intrumentation metric class and ignore collection"
+            D13n.logger.info "Null intrumentation metric class and ignore collection"
             return exception_without_d13n_instrumentation(*args)
           end
 
@@ -46,13 +46,13 @@ D13n::Metric::Instrumentation::Conductor.direct do
       end
 
       def exception_with_d13n_instrumentation(*args)
-        return exception_without_d13n_instrumentation(*args) if self < D13n::Metric::MetricError
+        return exception_without_d13n_instrumentation(*args) if self.class < D13n::Metric::MetricError
 
         manager = D13n::Metric::Manager.instance
         metric = manager.metric(:app_state)
         
         if metric.nil?
-          Axle.logger.info "Null intrumentation metric class and ignore collection"
+          D13n.logger.info "Null intrumentation metric class and ignore collection"
           return exception_without_d13n_instrumentation(*args)
         end
 
