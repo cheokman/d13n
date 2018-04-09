@@ -28,5 +28,6 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency "rspec", "~> 3.0"
 
-  spec.add_dependency "bundler", "~> 1.16"
+  spec.add_dependency "bundler", "~> 1.14"
+  spec.add_dependency 'statsd-instrument', '~>2.1.3'
 end
