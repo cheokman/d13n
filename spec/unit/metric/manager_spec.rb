@@ -62,7 +62,6 @@ describe D13n::Metric::Manager do
         end
 
         it 'set default protocol' do
-          pp @instance.backend.implementation
           expect(@instance.backend.implementation).to be_eql @default_protocol
         end
 

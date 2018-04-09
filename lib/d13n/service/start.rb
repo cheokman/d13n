@@ -3,6 +3,20 @@
 module D13n
   class Service
     module Start
+      def start_metric_manager
+        begin
+          channel = determine_metric_channel
+          Metric::Manager.start(channel)
+        rescue Exception => e
+          D13n.logger.error "Unknown Instrument Manager error. #{e.message}"
+        end
+      end
+
+      def start_api_service
+        @started = true
+        Object.const_get("#{D13n.application.name}::Api::Service").run!(@service_conf)
+      end
+
       def log_startup
         log_environment
         log_service_name
@@ -50,19 +64,12 @@ module D13n
         D13n.config[:'config_server.raise_on_failure']
       end
 
-      def start_metric_manager
-        begin
-          channel = D13n.config[:metric_channel_type] || D13n.config[:'metric.channel.type']
-          Api::Metric::Manager.start(channel)
-        rescue Exception => e
-          D13n.logger.error "Unknown Instrument Manager error. #{e.message}"
-        end
+      private
+      
+      def determine_metric_channel
+        D13n.config[:metric_channel_type] || D13n.config[:'metric.channel.type']
       end
-
-      def start_api_service
-        @started = true
-        Object.const_get("#{D13n.application.name}::Api::Service").run!(@service_conf)
-      end
+      
     end
   end
 end
