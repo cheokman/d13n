@@ -13,6 +13,10 @@ describe D13n::Logger::SilenceLogger do
 end
 
 describe D13n::Logger do
+  before(:each) do
+    D13n.reset
+  end
+  
   context "stdout logger" do
     context '#initialize' do
       before(:each) do

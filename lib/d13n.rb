@@ -26,8 +26,12 @@ module D13n
     # end
 
     def threaded
-      @threaded ||= {}
-      #Thread.current[:d13n] ||= {}
+      #@threaded ||= {}
+      Thread.current[:d13n] ||= {}
+    end
+
+    def reset
+      Thread.current[:d13n] = {}
     end
 
     def service
