@@ -1,13 +1,13 @@
 module D13n::Metric
   module Helper
     def self.http_request_for(app_name, direction)
-      downcase_direction = direction.to_s_downcase
+      downcase_direction = direction.to_s.downcase
       check_direction(downcase_direction)
       scope ||= []
       scope << D13n.idc_name
       scope << D13n.app_name.downcase
       scope << D13n.idc_env
-      scope << http
+      scope << 'http'
       scope << downcase_direction
       scope
     end
