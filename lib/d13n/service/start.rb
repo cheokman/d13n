@@ -61,7 +61,7 @@ module D13n
       end
 
       def config_server_raise_on_failure?
-        D13n.config[:'config_server.raise_on_failure']
+        D13n.config[:'config_server.raise_on_failure'] == true || D13n.config[:'config_server.raise_on_failure'] == 'true'
       end
 
       private
