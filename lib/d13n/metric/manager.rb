@@ -5,6 +5,7 @@ module D13n::Metric
   class MetricInitError < MetricError;end
   class MetricArgError < MetricError; end
   class MetricNotFoundError < MetricError; end
+  class InstrumentInitError < MetricError; end
   class Manager
     include D13n::Metric::Instrumentation
     def self.start(channel='logger', opt={})
@@ -59,7 +60,7 @@ module D13n::Metric
 
     def setup_logger_backend
       @logger = @opt.fetch(:logger, D13n.logger)
-      raise InstrumnetInitError.new "Missing Logger for logger backend" if @logger.nil?
+      raise InstrumentInitError.new "Missing Logger for logger backend" if @logger.nil?
       StatsD::Instrument::Backends::LoggerBackend.new(@logger)
     end
 
