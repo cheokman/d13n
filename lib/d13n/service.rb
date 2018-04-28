@@ -50,6 +50,7 @@ module D13n
       return if started?
       log_startup
       query_server_for_configuration
+      start_metric_manager
       start_api_service
     end
 
@@ -81,6 +82,7 @@ module D13n
     end
 
   private
+  
     def default_env
       ENV["#{D13n.app_prefix}_ENV"] || ENV['RACK_ENV'] || 'development'
     end
