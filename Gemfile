@@ -10,6 +10,7 @@ group :development do
 end
 
 group :test do
+  gem 'rubocop', require: false
   gem 'simplecov', '0.16.0'
   gem 'rspec'
   gem 'rspec-nc'
