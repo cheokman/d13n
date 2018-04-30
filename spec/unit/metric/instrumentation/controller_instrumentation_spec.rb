@@ -165,8 +165,66 @@ describe D13n::Metric::Instrumentation::ControllerInstrumentation::StreamNamer d
 end
 
 describe D13n::Metric::Instrumentation::ControllerInstrumentation do
+  let(:dummy_request) { double() }
+  let(:dummy_opt_request) { double() }
+  let(:dummy_request_args) { [{:request => dummy_opt_request}]}
+  let(:dummy_empty_args) { [{}]}
   before :each do 
     @dummy_class = Class.new
     @dummy_class.include(described_class)
+  end
+
+  describe '#metric_request' do
+    before :each do
+      allow_any_instance_of(@dummy_class).to receive(:request).and_return(dummy_request)
+    end
+
+    context 'when args has request hash' do
+      it 'should return request in args' do
+        expect(@dummy_class.new.send(:metric_request, dummy_request_args)).to be_eql dummy_opt_request
+      end
+    end
+
+    context 'when args has not request hash' do
+      it 'should return request in args' do
+        expect(@dummy_class.new.send(:metric_request, dummy_empty_args)).to be_eql dummy_request
+      end
+    end
+  end
+
+  describe '#create_stream_options' do
+    let (:dummy_request) { double() }
+    let (:dummy_params) {double()}
+    before :each do
+      allow(D13n::Metric::Instrumentation::ControllerInstrumentation::StreamNamer).to receive(:name_for).and_return 'dummy_name'
+    end
+    context 'when request in trace_options' do
+      it 'should get request options from trace_options' do
+        expect(@dummy_class.new.send(:create_stream_options, {:request => dummy_request}, nil, nil)).to include({:request => dummy_request})
+      end
+    end
+
+    context 'when no request in trace_options' do
+      before :each do
+        allow_any_instance_of(@dummy_class).to receive(:request).and_return(dummy_request)
+      end
+
+      it 'should get request from dummy class' do
+        expect(@dummy_class.new.send(:create_stream_options, {}, nil, nil)).to include({:request => dummy_request})
+      end
+    end
+
+    context 'when params in trance_options' do
+      it 'should have filtered_params in return' do
+        expect(@dummy_class.new.send(:create_stream_options, {:params => dummy_params}, nil, nil)).to include({:filtered_params => dummy_params})
+      end
+    end
+
+    it 'should have stream name in return' do
+      expect(@dummy_class.new.send(:create_stream_options, {}, nil, nil)).to include({:stream_name => 'dummy_name'})
+    end
+  end
+
+  describe '#perform_action_with_d13n_stream' do
   end
 end

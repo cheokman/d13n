@@ -31,6 +31,7 @@ module D13n::Metric::Instrumentation
       stream_options[:request] ||= request if respond_to?(:request) rescue nil
       stream_options[:filtered_params] = trace_options[:params]
       stream_options[:stream_name] = StreamNamer.name_for(nil, self, category, stream_options)
+      stream_options
     end
 
     def metric_request(args)
