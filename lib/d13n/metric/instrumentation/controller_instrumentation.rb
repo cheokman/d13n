@@ -1,16 +1,17 @@
+require 'd13n/metric/stream'
+require 'd13n/metric/stream_state'
 module D13n::Metric::Instrumentation
   module ControllerInstrumentation
     def perform_action_with_d13n_stream(*args, &block)
+      return yield unless ::D13n::Metric::Helper.http_in_tracable?
       state = D13n::Metric::StreamState.st_get
       state.request = metric_request(args)
-      return yield unless Helper.http_in_tracable?
 
       trace_options = args.last.is_a?(Hash) ? args.last : {}
       category = trace_options[:category] || :action
       stream_options = create_stream_options(trace_options, category, state)
-
       begin
-        stream = Stream.start(state category, stream_options)
+        stream = D13n::Metric::Stream.start(state, category, stream_options)
 
         begin
           yield
@@ -19,7 +20,7 @@ module D13n::Metric::Instrumentation
           raise
         end
       ensure
-        Stream.stop(state)
+        D13n::Metric::Stream.stop(state)
       end
     end
 

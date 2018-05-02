@@ -226,5 +226,34 @@ describe D13n::Metric::Instrumentation::ControllerInstrumentation do
   end
 
   describe '#perform_action_with_d13n_stream' do
+    let(:dummy_state) { double() }
+    before :each do
+      @dummy_class.class_eval {
+        def dummy_action;end
+
+        def dummy_action_with_hook
+          perform_action_with_d13n_stream(:category => "dummy",
+                                          :request => {},
+                                          :filtered_params => {}) do
+                                            dummy_action
+                                          end
+        end
+      }
+      allow_any_instance_of(@dummy_class).to receive(:metric_request).and_return(dummy_request)
+      allow_any_instance_of(@dummy_class).to receive(:create_stream_options).and_return({})
+      allow(dummy_state).to receive(:request=)
+    end
+
+    context 'when http in tracable false' do
+      before :each do
+        allow(::D13n::Metric::Helper).to receive(:http_in_tracable?).and_return(true)
+      end
+      it 'should return without call hook' do
+        @dummy_class.new.dummy_action_with_hook
+        expect(D13n::Metric::Stream).not_to receive(:start)
+
+        
+      end
+    end
   end
 end
