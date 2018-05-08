@@ -9,6 +9,10 @@ describe D13n::Metric::Instrumentation::MiddlewareTracing do
   let(:dm_instance) { DummyMiddleware.new }
   let(:dummy_stream) { double() }
   let(:dummy_state) { double() }
+  before :each do
+    allow_any_instance_of(DummyMiddleware).to receive(:category).and_return(:middleware)
+    allow_any_instance_of(DummyMiddleware).to receive(:transaction_options).and_return({})
+  end
   describe '#stream_started' do
     let(:started_key) {D13n::Metric::Instrumentation::MiddlewareTracing::STREAM_STARTED_KEY}
     context 'when not STREAM_STARTED_KEY' do
@@ -52,8 +56,35 @@ describe D13n::Metric::Instrumentation::MiddlewareTracing do
    
     before :each do
       allow(D13n::Metric::StreamState).to receive(:st_get).and_return(dummy_state)
-      allow(D13n::Metric::Stream).to receive(start)
-      allow(D13n::Metric::Stream).to receive(stop)
+      allow(D13n::Metric::Stream).to receive(:start)
+      allow(D13n::Metric::Stream).to receive(:stop)
+      allow_any_instance_of(DummyMiddleware).to receive(:stream_started)
+    end
+
+    describe 'when exception accurred' do
+      before :each do
+        allow(D13n::Metric::Stream).to receive(:start).and_raise(ArgumentError)
+      end
+
+      it 'should call logger for error' do
+        expect {dm_instance.call(dummy_env)}.to raise_error(ArgumentError)
+      end
+
+      it 'should call logger for error' do
+        expect(D13n.logger).to receive(:error)
+        begin
+        dm_instance.call(dummy_env)
+        rescue => e
+        end
+      end
+
+      it 'should call logger for error' do
+        expect(D13n::Metric::Stream).to receive(:stop)
+        begin
+        dm_instance.call(dummy_env)
+        rescue => e
+        end
+      end
     end
   end
 
@@ -138,4 +169,6 @@ describe D13n::Metric::Instrumentation::MiddlewareTracing do
       dm_instance.capture_response_content_type(dummy_state, dummy_result)
     end
   end
+
+  
 end
