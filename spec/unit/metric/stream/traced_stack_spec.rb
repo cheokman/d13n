@@ -1,6 +1,6 @@
 require 'spec_helper'
-require 'd13n/operation/traced_stack'
-describe D13n::Operation::StackFrame do
+require 'd13n/metric/stream/traced_stack'
+describe D13n::Metric::Stream::StackFrame do
   before :each do
     @start_time = Time.now
     @instance = described_class.new('http', @start_time)
@@ -19,7 +19,7 @@ describe D13n::Operation::StackFrame do
   end
 end
 
-describe D13n::Operation::TracedStack do
+describe D13n::Metric::Stream::TracedStack do
   before :each do
     @instance = described_class.new
     @state = double()
@@ -37,7 +37,7 @@ describe D13n::Operation::TracedStack do
     context 'with time' do
       it 'push as stack frame' do
         frame = @instance.push_frame(@state, @tag, @time)
-        expect(frame).to be_kind_of D13n::Operation::StackFrame
+        expect(frame).to be_kind_of D13n::Metric::Stream::StackFrame
       end
 
       it 'is the last of stack' do
@@ -78,7 +78,7 @@ describe D13n::Operation::TracedStack do
         @last_frame = @instance.push_frame(@state, 'http')
         @expected_frame = @last_frame if i == @expected_position
       }
-      @unexpected_frame = D13n::Operation::StackFrame.new('http', 1501059108.048553)
+      @unexpected_frame = D13n::Metric::Stream::StackFrame.new('http', 1501059108.048553)
     end
 
     context 'expected_frame is the last one' do
@@ -108,7 +108,7 @@ describe D13n::Operation::TracedStack do
 
     context 'unexpected_frame' do
       it 'pop all frame' do
-        expect { @instance.fetch_matching_frame(@unexpected_frame)}.to raise_error D13n::Operation::UnexpectedStackError
+        expect { @instance.fetch_matching_frame(@unexpected_frame)}.to raise_error D13n::Metric::Stream::UnexpectedStackError
         expect(@instance.empty?).to be_truthy
       end
     end
@@ -121,7 +121,7 @@ describe D13n::Operation::TracedStack do
       @child_frame_children_time = 300.00
       @current_time = @start_time + @call_time
       
-      @child_frame = D13n::Operation::StackFrame.new('http', @start_time)
+      @child_frame = D13n::Metric::Stream::StackFrame.new('http', @start_time)
       @child_frame.children_time = @child_frame_children_time
     end
 
