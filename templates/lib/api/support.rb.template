@@ -11,7 +11,7 @@ module <%= application_base %>::Api
     before do
       headers 'X-Powered-By' => "<%= application_base %>#{<%= application_base %>::VERSION}"
       headers 'X-Api-Version' => "#{<%= application_base %>::Api::VERSION}"
-      D13n::Operation::State.opt_get.request_info = request_info
+      D13n::Metric::StreamState.st_get.request_info = request_info
     end
 
     get "/" do
