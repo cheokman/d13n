@@ -134,7 +134,33 @@ describe D13n::Metric::AppHttpMetric::Out do
     allow(@state).to receive(:traced_stack).and_return(@stack)
   end
 
+  describe '#inject_request_headers' do
+    let(:dummy_state) {double()}
+    let(:dummy_stream) {double()}
+    let(:dummy_request) {{}}
+    before :each do
+      allow(dummy_state).to receive(:current_stream).and_return(dummy_stream)
+      allow(dummy_stream).to receive(:get_id).and_return('aaa')
+      allow(D13n).to receive(:app_name).and_return('dummy_app')
+    end
+
+    it 'should update D13N_STREAM_HEADER' do
+      @instance.inject_request_headers(dummy_state, dummy_request)
+      expect(dummy_request[D13n::Metric::AppHttpMetric::Out::D13N_STREAM_HEADER]).to be_eql('aaa')
+    end
+
+    it 'should update D13N_APP_HEADER' do
+      @instance.inject_request_headers(dummy_state, dummy_request)
+      expect(dummy_request[D13n::Metric::AppHttpMetric::Out::D13N_APP_HEADER]).to be_eql('dummy_app')
+    end
+
+  end
+
   describe '#start' do
+    before :each do
+      allow_any_instance_of(@kls).to receive(:inject_request_headers)
+    end
+
     it 'return nil when any exception' do
       allow(@stack).to receive(:push_frame).and_raise Exception
       expect(@instance.start(@state, Time.now, '')).to be_nil

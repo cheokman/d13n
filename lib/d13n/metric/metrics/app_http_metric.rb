@@ -69,9 +69,15 @@ module D13n::Metric
 
     module In
       include Namespace
-      def process(request)
-        state = D13n.opt_state
-        return yield unless Helper.http_out_tracable?
+      def process(*args, &block)
+        return yield unless Helper.http_in_tracable?
+
+        state = D13n::Metric::StreamState.st_get
+        state.request = metric_request(args)
+        
+        trace_options = args.last.is_a?(Hash) ? args.last : {}
+        category = trace_options[:category] || :action
+        stream_options = create_stream_options(trace_options, category, state)
 
         t0 = Time.now
         begin
@@ -94,8 +100,13 @@ module D13n::Metric
 
     module Out
       include Namespace
+
+      D13N_STREAM_HEADER = 'X-D13n-Stream'
+      D13N_APP_HEADER = 'X-D13n-App'
+      REQUEST_ID_HEADER = 'HTTP_X_REQUEST_ID'
+      
       def process(request, collectable=true)
-        state = D13n.opt_state
+        state =  D13n::Metric::StreamState.st_get
 
         return yield unless collectable && Helper.http_out_tracable?
 
@@ -114,12 +125,21 @@ module D13n::Metric
       end
 
       def start(state, t0, request)
+        inject_request_headers(state, request)
         stack = state.traced_stack
         node = stack.push_frame(state, prefix , t0)
         return node
       rescue => e
         D13n.logger.error 'Uncaught exception while start processing HTTP request metric', e
         return nil
+      end
+
+      def inject_request_headers(state, request)
+        stream = state.current_stream
+        if stream
+          request[D13N_STREAM_HEADER] = stream.get_id
+        end
+        request[D13N_APP_HEADER] = D13n.app_name        
       end
 
       def finish(state, t0, node, request, response)
