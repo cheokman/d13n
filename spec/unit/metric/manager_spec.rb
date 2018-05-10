@@ -6,23 +6,23 @@ describe D13n::Metric::Manager do
       allow_any_instance_of(described_class).to receive(:set_backend)
       allow_any_instance_of(described_class).to receive(:setup_instrumentation)
       @channel = 'udp'
-      @opt = {a: 1, b: 2}
+      @opts = {a: 1, b: 2}
       
     end
 
     it 'assign channel' do
-      @instance = described_class.new(@channel, @opt)
+      @instance = described_class.new(@channel, @opts)
       expect(@instance.channel).to be_eql @channel
     end
 
     it 'assign opt' do
-      @instance = described_class.new(@channel, @opt)
-      expect(@instance.instance_variable_get(:@opt)).to be_eql @opt
+      @instance = described_class.new(@channel, @opts)
+      expect(@instance.instance_variable_get(:@opts)).to be_eql @opts
     end
 
     it 'set_backend called' do
       expect_any_instance_of(described_class).to receive(:set_backend).once
-      @instance = described_class.new(@channel, @opt)
+      @instance = described_class.new(@channel, @opts)
     end
   end
 
@@ -36,7 +36,7 @@ describe D13n::Metric::Manager do
         @host = 'statsd'
         @port = 1234
         @protocol = :statsd
-        @opt = {host: @host, port: @port}
+        @opts = {host: @host, port: @port}
         @default_host = 'localhost'
         @default_port = 8123
         @default_protocol = :datadog
@@ -72,7 +72,7 @@ describe D13n::Metric::Manager do
 
       context 'with opt' do
         before :each do
-          @instance = described_class.new('udp', @opt.merge({protocol: @protocol}))
+          @instance = described_class.new('udp', @opts.merge({protocol: @protocol}))
         end
 
         it 'set udp backend' do

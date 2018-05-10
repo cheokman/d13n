@@ -1,6 +1,7 @@
 require 'statsd-instrument'
 require 'd13n/metric/metrics'
 require 'd13n/metric/instrumentation'
+require 'd13n/metric/stream'
 module D13n::Metric
   class MetricInitError < MetricError;end
   class MetricArgError < MetricError; end
@@ -8,12 +9,16 @@ module D13n::Metric
   class InstrumentInitError < MetricError; end
   class Manager
     include D13n::Metric::Instrumentation
-    def self.start(channel='logger', opt={})
-      @instance ||= new(channel, opt)
+    def self.start(channel='logger', opts={})
+      @instance ||= new(channel, opts)
     end
 
     def self.instance
       @instance || start
+    end
+
+    def self.notice_error(exception, opts={})
+      Stream.notice_error(exception, opts)
     end
 
     extend Forwardable
@@ -31,9 +36,9 @@ module D13n::Metric
 
     attr_reader :channel, :backend
 
-    def initialize(channel, opt={})
+    def initialize(channel, opts={})
       self.channel = channel
-      @opt = opt
+      @opts = opts
       set_backend
       setup_instrumentation
     end
@@ -51,15 +56,15 @@ module D13n::Metric
     end
 
     def setup_udp_backend
-      @host = @opt.fetch(:host, default_host)
-      @port = @opt.fetch(:port, default_port)
+      @host = @opts.fetch(:host, default_host)
+      @port = @opts.fetch(:port, default_port)
       @backend_uri = "#{@host}:#{@port}"
-      @protocol = @opt.fetch(:protocol, default_protocol)
+      @protocol = @opts.fetch(:protocol, default_protocol)
       StatsD::Instrument::Backends::UDPBackend.new(@backend_uri, @protocol) 
     end
 
     def setup_logger_backend
-      @logger = @opt.fetch(:logger, D13n.logger)
+      @logger = @opts.fetch(:logger, D13n.logger)
       raise InstrumentInitError.new "Missing Logger for logger backend" if @logger.nil?
       StatsD::Instrument::Backends::LoggerBackend.new(@logger)
     end
@@ -97,6 +102,5 @@ module D13n::Metric
     def default_protocol
       D13n.config[:'service.metric.protocol'] || :datadog
     end
-    
   end
 end
