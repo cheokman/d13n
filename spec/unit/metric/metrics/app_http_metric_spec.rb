@@ -140,18 +140,27 @@ describe D13n::Metric::AppHttpMetric::Out do
     let(:dummy_request) {{}}
     before :each do
       allow(dummy_state).to receive(:current_stream).and_return(dummy_stream)
-      allow(dummy_stream).to receive(:get_id).and_return('aaa')
+      allow(dummy_state).to receive(:is_cross_app_caller=)
+      allow(dummy_stream).to receive(:uuid).and_return('aaa')
       allow(D13n).to receive(:app_name).and_return('dummy_app')
     end
 
     it 'should update D13N_STREAM_HEADER' do
+      allow(dummy_state).to receive(:referring_stream_id).and_return(nil)
       @instance.inject_request_headers(dummy_state, dummy_request)
-      expect(dummy_request[D13n::Metric::AppHttpMetric::Out::D13N_STREAM_HEADER]).to be_eql('aaa')
+      expect(dummy_request[D13n::Metric::StreamState::D13N_STREAM_HEADER]).to be_eql('aaa')
+    end
+
+    it 'should update D13N_STREAM_HEADER from stream state' do
+      allow(dummy_state).to receive(:referring_stream_id).and_return('bbb')
+      @instance.inject_request_headers(dummy_state, dummy_request)
+      expect(dummy_request[D13n::Metric::StreamState::D13N_STREAM_HEADER]).to be_eql('bbb')
     end
 
     it 'should update D13N_APP_HEADER' do
+      allow(dummy_state).to receive(:referring_stream_id).and_return(nil)
       @instance.inject_request_headers(dummy_state, dummy_request)
-      expect(dummy_request[D13n::Metric::AppHttpMetric::Out::D13N_APP_HEADER]).to be_eql('dummy_app')
+      expect(dummy_request[D13n::Metric::StreamState::D13N_APP_HEADER]).to be_eql('dummy_app')
     end
 
   end

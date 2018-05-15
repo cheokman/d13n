@@ -101,10 +101,6 @@ module D13n::Metric
     module Out
       include Namespace
 
-      D13N_STREAM_HEADER = 'X-D13n-Stream'
-      D13N_APP_HEADER = 'X-D13n-App'
-      REQUEST_ID_HEADER = 'HTTP_X_REQUEST_ID'
-      
       def process(request, collectable=true)
         state =  D13n::Metric::StreamState.st_get
 
@@ -136,10 +132,12 @@ module D13n::Metric
 
       def inject_request_headers(state, request)
         stream = state.current_stream
+
+        state.is_cross_app_caller = true
         if stream
-          request[D13N_STREAM_HEADER] = stream.get_id
+          request[StreamState::D13N_STREAM_HEADER] = state.referring_stream_id || stream.uuid
         end
-        request[D13N_APP_HEADER] = D13n.app_name        
+        request[StreamState::D13N_APP_HEADER] = D13n.app_name        
       end
 
       def finish(state, t0, node, request, response)
