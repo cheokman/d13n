@@ -8,7 +8,7 @@ module D13n::Metric::Instrumentation
       state = D13n::Metric::StreamState.st_get
 
       begin
-        Stream.start(state, category, build_stream_options(env, first_middleware))
+        D13n::Metric::Stream.start(state, category, build_stream_options(env, first_middleware))
        
         result = (target == self) ? traced_call(env) : target.call(env)
 
@@ -21,7 +21,7 @@ module D13n::Metric::Instrumentation
         D13n.logger.error(e)
         raise e
       ensure
-        Stream.stop(state)
+        D13n::Metric::Stream.stop(state)
       end
     end
 
@@ -32,7 +32,7 @@ module D13n::Metric::Instrumentation
     end
 
     CONTENT_TYPE = 'Content-Type'.freeze unless defined?(CONTENT_TYPE)
-    
+
     def capture_response_content_type(state, result)
       if result.is_a?(Array) && state.current_stream
         _, headers, _ = result
