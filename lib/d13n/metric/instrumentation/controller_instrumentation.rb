@@ -53,6 +53,7 @@ module D13n::Metric::Instrumentation
         category ||= (stream && stream.category)
         case category
         when :sinatra  then ::D13n::Metric::Stream::SINATRA_PREFIX
+        when :middleware then ::D13n::Metric::Stream::MIDDLEWARE_PREFIX
         else "#{category.to_s}"
         end
       end
