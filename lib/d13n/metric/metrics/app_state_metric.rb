@@ -19,6 +19,8 @@ module D13n::Metric
         tags << "name:#{exception.class.name}"
         tags << "at:#{opts.fetch(:at, 'runtime')}"
         tags << "src:#{opts.fetch(:src, 'app')}"
+        tags << "uuid: #{opts.fetch(:uuid, 'unknown')}"
+        tags << "stream_id: #{opts[:referring_stream_id] || opts.fetch(:uuid, 'unknown'))}"
         tags
       end
     end
@@ -58,6 +60,8 @@ module D13n::Metric
       end
 
       def finish(exception)
+        metric_data = D13n::Metric::StreamState.default_metric_data
+        @opts.merge!(metric_data)
         collect_exception_count(exception, @opts)
       end
 
