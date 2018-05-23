@@ -1,8 +1,173 @@
 require 'spec_helper'
+require 'd13n/metric'
 require 'd13n/metric/stream/stream_tracer_helpers'
 describe D13n::Metric::Stream::StreamTracerHelpers do
-  
+  let(:dummy_collector) {double()}
+  let(:dummy_state) {double()}
+  let(:dummy_timing) {1.0}
+  let(:dummy_guage) {10}
+  let(:dummy_metric_data) {double()}
+  let(:dummy_error) {double()}
+  let(:dummy_errors) {[ArgumentError.new, RuntimeError]}
+  before :each do
+    allow(dummy_collector).to receive(:increment)
+    allow(dummy_collector).to receive(:guage)
+    allow(dummy_collector).to receive(:measure)
+    allow(described_class).to receive(:metric_name).with("timing").and_return('timing')
+    allow(described_class).to receive(:metric_name).with("count").and_return('count')
+    allow(described_class).to receive(:metric_name).with("guage").and_return('guage')
+    allow(described_class).to receive(:stream_duration_tags).and_return("tags")
+    allow(described_class).to receive(:stream_exclusive_tags).and_return("tags")
+    allow(described_class).to receive(:stream_apdex_tags).and_return("tags")
+    allow(described_class).to receive(:stream_error_tags).and_return("tags")
+    allow(described_class).to receive(:stream_http_response_code_tags).and_return("tags")
+    allow(described_class).to receive(:stream_http_response_content_type_tags).and_return("tags")
+    allow(described_class).to receive(:stream_http_response_content_length_tags).and_return("tags")
+  end
+
+  describe 'collect_duration_metric' do
+    it 'should call collector measure' do
+      expect(dummy_collector).to receive(:measure)
+      described_class.collect_duration_metric(dummy_collector, dummy_state, dummy_timing, dummy_metric_data)
+    end
+  end
+
+  describe 'collect_exclusive_metric' do
+    it 'should call collector measure' do
+      expect(dummy_collector).to receive(:measure)
+      described_class.collect_exclusive_metric(dummy_collector, dummy_state, dummy_timing, dummy_metric_data)
+    end
+  end
+
+  describe 'collect_apdex_metric' do
+    it 'should call collector increment' do
+      expect(dummy_collector).to receive(:increment)
+      described_class.collect_apdex_metric(dummy_collector, dummy_state, dummy_metric_data)
+    end
+  end
+
+  describe 'collect_repsonse_code_metric' do
+    it 'should call collector increment' do
+      expect(dummy_collector).to receive(:increment)
+      described_class.collect_repsonse_code_metric(dummy_collector, dummy_state, dummy_metric_data)
+    end
+  end
+
+  describe 'collect_response_content_type_metric' do
+    it 'should call collector increment' do
+      expect(dummy_collector).to receive(:increment)
+      described_class.collect_response_content_type_metric(dummy_collector, dummy_state, dummy_metric_data)
+    end
+  end
+
+  describe 'collect_response_content_length_metric' do
+    it 'should call collector increment' do
+      expect(dummy_collector).to receive(:guage)
+      described_class.collect_response_content_length_metric(dummy_collector, dummy_state, dummy_guage, dummy_metric_data)
+    end
+  end
+
+  describe 'collect_response_metric' do
+    before :each do
+      allow(dummy_metric_data).to receive(:[]).with(:http_response_content_lenght)
+    end
+    it 'should call collect_repsonse_code_metric' do
+      expect(described_class).to receive(:collect_repsonse_code_metric)
+      described_class.collect_response_metric(dummy_collector, dummy_state, dummy_metric_data)
+    end
+    it 'should call collect_response_content_type_metric' do
+      expect(described_class).to receive(:collect_response_content_type_metric)
+      described_class.collect_response_metric(dummy_collector, dummy_state, dummy_metric_data)
+    end
+    it 'should call collect_response_content_length_metric' do
+      expect(described_class).to receive(:collect_response_content_length_metric)
+      described_class.collect_response_metric(dummy_collector, dummy_state, dummy_metric_data)
+    end
+  end
+
+  describe '#collect_error_metric' do
+    it 'should call collector increment' do
+      expect(dummy_collector).to receive(:increment)
+      described_class.collect_error_metric(dummy_collector, dummy_state, dummy_error, dummy_metric_data)
+    end
+  end
+
+  describe '#collect_errors_metric' do
+    before :each do
+      allow(dummy_metric_data).to receive(:[]).and_return(dummy_errors)
+    end
+    it 'should call error metric one by one' do
+      expect(described_class).to receive(:collect_error_metric).exactly(dummy_errors.size).times
+      described_class.collect_errors_metric(dummy_collector, dummy_state, dummy_metric_data)
+    end
+  end
+
+  describe '#collect_metric' do
+    before :each do
+      allow(D13n::Metric::Manager).to receive(:instance).and_return(dummy_collector)
+      allow(dummy_metric_data).to receive(:[]).with(:duration).and_return(dummy_timing)
+      allow(dummy_metric_data).to receive(:[]).with(:exclusive).and_return(dummy_timing)
+      allow(dummy_metric_data).to receive(:[]).with(:http_response_content_lenght).and_return(300)
+    end
+
+    context "when no error" do
+      before :each do
+        allow(dummy_metric_data).to receive(:[]).with(:error).and_return(false)
+      end
+      it 'should call duration metric collection' do
+        expect(described_class).to receive(:collect_duration_metric)
+        described_class.collect_metric(dummy_state, dummy_metric_data)
+      end
+      it 'should call exclusive metric collection' do
+        expect(described_class).to receive(:collect_exclusive_metric)
+        described_class.collect_metric(dummy_state, dummy_metric_data)
+      end
+      it 'should call apdex metric collection' do
+        expect(described_class).to receive(:collect_apdex_metric)
+        described_class.collect_metric(dummy_state, dummy_metric_data)
+      end
+      it 'should call response metric collection' do
+        expect(described_class).to receive(:collect_response_metric)
+        described_class.collect_metric(dummy_state, dummy_metric_data)
+      end
+
+      it 'shoule not call errors metric' do
+        expect(described_class).not_to receive(:collect_errors_metric)
+        described_class.collect_metric(dummy_state, dummy_metric_data)
+      end
+    end
+
+
+    context "when error" do
+      before :each do
+        allow(dummy_metric_data).to receive(:[]).with(:error).and_return(true)
+        allow(dummy_metric_data).to receive(:[]).with(:errors).and_return(dummy_errors)
+      end
+      it 'should call duration metric collection' do
+        expect(described_class).to receive(:collect_duration_metric)
+        described_class.collect_metric(dummy_state, dummy_metric_data)
+      end
+      it 'should call exclusive metric collection' do
+        expect(described_class).to receive(:collect_exclusive_metric)
+        described_class.collect_metric(dummy_state, dummy_metric_data)
+      end
+      it 'should call apdex metric collection' do
+        expect(described_class).to receive(:collect_apdex_metric)
+        described_class.collect_metric(dummy_state, dummy_metric_data)
+      end
+      it 'should call response metric collection' do
+        expect(described_class).to receive(:collect_response_metric)
+        described_class.collect_metric(dummy_state, dummy_metric_data)
+      end
+
+      it 'shoule call errors metric' do
+        expect(described_class).to receive(:collect_errors_metric)
+        described_class.collect_metric(dummy_state, dummy_metric_data)
+      end
+    end
+  end
 end
+
 describe D13n::Metric::Stream::StreamTracerHelpers::Namer do
   let(:dummy_module) { Module.new { include D13n::Metric::Stream::StreamTracerHelpers::Namer; extend self}}
   let(:dummy_type) { 'dummy_type'}
@@ -92,8 +257,8 @@ describe D13n::Metric::Stream::StreamTracerHelpers::Namer do
     describe "http metric" do
       let(:dummy_http_metric_data) { {
         :http_response_code => "200",
-        :http_response_type => 'json',
-        :http_response_lenght => 300
+        :http_response_content_type => 'json',
+        :http_response_content_lenght => 300
       }}
 
       describe "stream_http_response_code_tags" do
@@ -104,7 +269,7 @@ describe D13n::Metric::Stream::StreamTracerHelpers::Namer do
 
       describe "stream_http_response_type_tags" do
         it 'should return tags with type' do
-          expect(dummy_module.stream_http_response_content_type_tags(dummy_http_metric_data)).to match_array (dummy_stream_basic_tags + ["response:type", "type:#{dummy_http_metric_data[:http_response_type]}"])
+          expect(dummy_module.stream_http_response_content_type_tags(dummy_http_metric_data)).to match_array (dummy_stream_basic_tags + ["response:type", "type:#{dummy_http_metric_data[:http_response_content_type]}"])
         end
       end
 
@@ -135,6 +300,13 @@ describe D13n::Metric::Stream::StreamTracerHelpers::Namer do
         it 'should return error class name' do
           expect(dummy_module.stream_error_tags(dummy_metric_data, @dummy_error_instance)).to match_array dummy_stream_basic_tags << "error:DummyError"
         end
+      end
+    end
+
+    describe "stream_apdex_tags" do
+      let(:dummy_apdex_metric_data) { {:apdex_perf_zone => 't'}}
+      it "should return apdex_zone tag" do
+        expect(dummy_module.stream_apdex_tags(dummy_apdex_metric_data)).to match_array dummy_stream_basic_tags << "apdex_zone:#{dummy_apdex_metric_data[:apdex_perf_zone]}"
       end
     end
   end

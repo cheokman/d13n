@@ -49,7 +49,7 @@ module D13n::Metric
         def stream_http_response_content_type_tags(metric_data)
           tags = stream_basic_tags(metric_data)
           tags << "response:type"
-          tags << "type:#{metric_data[:http_response_type]}"
+          tags << "type:#{metric_data[:http_response_content_type]}"
           tags
         end
 
@@ -62,6 +62,12 @@ module D13n::Metric
         def stream_error_tags(metric_data, error)
           tags = stream_basic_tags(metric_data)
           tags << "error:#{error.is_a?(Class) ? error.name : error.class.name}"
+          tags
+        end
+
+        def stream_apdex_tags(metric_data)
+          tags = stream_basic_tags(metric_data)
+          tags << "apdex_zone:#{metric_data[:apdex_perf_zone]}"
           tags
         end
       end
@@ -77,7 +83,7 @@ module D13n::Metric
         collector.measure(metric_name("timing"), timing, sample_rate: rate, tags: stream_exclusive_tags(metric_data))
       end
 
-      def collect_apdex_metric(collector, state,  metric_data, count=1,rate=1.0)
+      def collect_apdex_metric(collector, state, metric_data, count=1,rate=1.0)
         collector.increment(metric_name("count"), count, sample_rate: rate, tags: stream_apdex_tags(metric_data))
       end
 
@@ -96,7 +102,7 @@ module D13n::Metric
       def collect_response_metric(collector, state, metric_data)
         collect_repsonse_code_metric(collector, state, metric_data)
         collect_response_content_type_metric(collector, state, metric_data)
-        collect_response_content_length_metric(collector, state, metric_data[:response_content_lenght], metric_data)
+        collect_response_content_length_metric(collector, state, metric_data[:http_response_content_lenght], metric_data)
       end
 
       def collect_error_metric(collector, state, error, metric_data, count=1, rate=1.0 )
