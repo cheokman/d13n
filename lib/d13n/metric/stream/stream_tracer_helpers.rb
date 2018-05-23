@@ -17,20 +17,20 @@ module D13n::Metric
           tags << "app:#{D13n.app_name}"
           tags << "name:#{metric_data[:name]}"
           tags << "uuid:#{metric_data[:uuid]}"
-          tags << "stream_id: #{metric_data[:referring_stream_id] || metric_data[:uuid]}"
-          tags << "type: #{metric_data[:referring_stream_id].nil? ? 'stream' : 'span'}"
+          tags << "stream_id:#{metric_data[:referring_stream_id] || metric_data[:uuid]}"
+          tags << "type:#{metric_data[:referring_stream_id].nil? ? 'stream' : 'span'}"
           tags
         end
   
         def stream_duration_tags(metric_data)
           tags = stream_basic_tags(metric_data)
-          tags << "time: duration"
+          tags << "time:duration"
           tags
         end
   
-        def stream_duration_tags(metric_data)
+        def stream_exclusive_tags(metric_data)
           tags = stream_basic_tags(metric_data)
-          tags << "time: exclusive"
+          tags << "time:exclusive"
           tags
         end
   
@@ -39,35 +39,29 @@ module D13n::Metric
           tags
         end
 
-        def stream_apdex_tags(metric_data)
-          tags = stream_basic_tags(metric_data)
-          tags << "apdex_zone: #{metric_data[:apdex_perf_zone]}"
-          tags
-        end
-
         def stream_http_response_code_tags(metric_data)
           tags = stream_basic_tags(metric_data)
-          tags << "response: code"
-          tags << "code: #{metric_data[:http_response_code]}"
+          tags << "response:code"
+          tags << "code:#{metric_data[:http_response_code]}"
           tags
         end
 
-        def stream_http_response_ontent_type_tags(metric_data)
+        def stream_http_response_content_type_tags(metric_data)
           tags = stream_basic_tags(metric_data)
-          tags << "response: type"
-          tags << "type: #{metric_data[:http_response_type]}"
+          tags << "response:type"
+          tags << "type:#{metric_data[:http_response_type]}"
           tags
         end
 
         def stream_http_response_content_length_tags(metric_data)
           tags = stream_basic_tags(metric_data)
-          tags << "response: length"
+          tags << "response:length"
           tags
         end
   
         def stream_error_tags(metric_data, error)
           tags = stream_basic_tags(metric_data)
-          tags << "error: #{error.is_a? Class ? error.name.underscore : errro.class.name.underscore}"
+          tags << "error:#{error.is_a?(Class) ? error.name : error.class.name}"
           tags
         end
       end
