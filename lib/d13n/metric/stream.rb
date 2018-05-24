@@ -21,7 +21,7 @@ module D13n::Metric
                   :response_content_length,
 
     def self.st_current
-      StreamState.tl_get.current_stream
+      StreamState.st_get.current_stream
     end
 
     def self.set_default_stream_name(name, category = nil, node_name = nil)
@@ -54,7 +54,7 @@ module D13n::Metric
       stream
     end
 
-    def self.stop(state, ended_time=Time.now)
+    def self.stop(state, ended_time=Time.now.to_i)
       stream = state.current_stream
 
       if stream.nil?
@@ -70,7 +70,7 @@ module D13n::Metric
       else
         nested_name = nested_stream_name(nested_frame.name)
 
-        D13n::Metric::Stream::SpanTraceHelpers.trace_footer(state, nested_frame.started_at.to_i, nested_name, nested_frame, {})
+        D13n::Metric::Stream::SpanTracerHelpers.trace_footer(state, nested_frame.started_at.to_i, nested_name, nested_frame, {})
         ## Collect Metric
       end
       :stream_stopped
@@ -116,7 +116,7 @@ module D13n::Metric
     end
 
     def start(state)
-      @frame_stack.push D13n::Metric::Stream::SpanTraceHelpers.trace_helper(state, @started_at)
+      @frame_stack.push D13n::Metric::Stream::SpanTracerHelpers.trace_header(state, @started_at)
       name_last_frame @default_name
     end
 
@@ -128,13 +128,13 @@ module D13n::Metric
         name = @frozen_name
       end
 
-      D13n::Metric::Stream::SpanTraceHelpers.trace_footer(state, started_at.to_i, name, outermost_frame, trace_options, ended_time.to_i)
-      commit!(state, ended_time, name) unless @ignore_this_stream
+      D13n::Metric::Stream::SpanTracerHelpers.trace_footer(state, started_at.to_i, name, outermost_frame, trace_options, ended_time.to_i)
+      commit!(state, ended_time) unless @ignore_this_stream
     end
 
-    def conmmit!(state, ended_time, name)
-      metric_data = {}
-      @metric_data = collect_apdex(state, ended_time, metric_data)
+    def commit!(state, ended_time)
+      @metric_data = {}
+      collect_metric_data(state, @metric_data, ended_time)
       collect_metrics(state, @metric_data)
     end
 
@@ -151,32 +151,32 @@ module D13n::Metric
       StreamTracerHelpers.collect_metrics(state, metric_data)
     end
 
-    def collect_apdex(state, ended_time = Time.now.to_i)
+    def collect_metric_data(state, metric_data, ended_time = Time.now.to_i)
       total_duration = ended_time - @apdex_started_at
-      action_duration = ended_time - @started_at
+      action_duration = ended_time - @started_at.to_i
 
-      collect_apdex_metric(total_duration, action_duration, apdex_t)
-      generate_metric_data(state, @started_at, ended_time)
+      # collect_apdex_metric(total_duration, action_duration, apdex_t)
+      generate_metric_data(state, metric_data, @started_at, ended_time)
     end
 
-    def collect_apdex_metric(total_duration, action_duration, current_apdex_t)
-      apdex_bucket_global = apdex_bucket(total_duration, current_apdex_t)
-      apdex_bucket_stream = apdex_bucket(action_duration, current_apdex_t)
-    end
+    # def collect_apdex_metric(total_duration, action_duration, current_apdex_t)
+    #   apdex_bucket_global = apdex_bucket(total_duration, current_apdex_t)
+    #   apdex_bucket_stream = apdex_bucket(action_duration, current_apdex_t)
+    # end
 
-    def default_metrice_data
+    def default_metric_data
       metric_data = {
         :name => @frozen_name || @default_name,
-        :uuid => @uuid,
+        :uuid => uuid,
         :error => false
       }
 
-      generate_error_data(state, metric_data)
-      metric_data[:referring_stream_id] if @state.referring_stream_id
+      generate_error_data(metric_data)
+      metric_data[:referring_stream_id] = @state.referring_stream_id if @state.referring_stream_id
       metric_data
     end
 
-    def generate_error_data(state, metric_data)
+    def generate_error_data(metric_data)
       if had_error?
         metric_data.merge!({
          :error => true,
@@ -186,17 +186,20 @@ module D13n::Metric
     end
 
     def generate_default_metric_data(state, started_at, ended_time, metric_data)
-      duration = ended_time.to_i - started_at.to_i
-
-      metric_data = default_metric_data.merge({
+      duration = ended_time - started_at
+      
+      metric_data.merge!(default_metric_data)
+      metric_data.merge!({
         :type => :request,
-        :started_at => @started_at.to_i,
+        :started_at => started_at,
         :duration => duration,
       })
       metric_data
     end
 
-    def generate_metric_data(state, started_at, ended_time, metric_data)
+    def generate_metric_data(state, metric_data, started_at, ended_time)
+      duration = ended_time - started_at
+      metric_data ||= {}
       generate_default_metric_data(state, started_at, ended_time, metric_data)
       append_apdex_perf_zone(duration, metric_data)
       append_web_response(@http_response_code, @response_content_type, @response_content_length, metric_data) if recording_web_transaction?
@@ -220,7 +223,7 @@ module D13n::Metric
       bucket = apdex_bucket(duration, apdex_t)
 
       return unless bucket
-
+ 
       bucket_str = case bucket
       when :apdex_s then APDEX_S
       when :apdex_t then APDEX_T
@@ -299,7 +302,7 @@ module D13n::Metric
     def uuid
       return @uuid if @uuid
       request_info = StreamState.request_info
-      @uuid = request_info["request_id"].nil? ? SecureRandom.hex(16) : request_info["request_id"]
+      @uuid = (request_info.nil? || request_info["request_id"].nil?) ? SecureRandom.hex(16) : request_info["request_id"]
       @uuid
     end
   end

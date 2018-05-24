@@ -7,6 +7,267 @@ describe D13n::Metric::Stream do
   let(:dummy_frame) { double() }
   let(:dummy_frame_stack) {[dummy_frame]}
   let(:dummy_state) {double()}
+  let(:dummy_stream) {double()}
+
+  describe '#start' do
+    before :each do
+      allow(D13n::Metric::Stream::SpanTracerHelpers).to receive(:trace_header).and_return dummy_frame
+      allow(dummy_frame).to receive(:name=)
+      described_instance.instance_variable_set(:@frame_stack, dummy_frame_stack)
+    end
+
+    it 'should push a new frame' do
+      expect(dummy_frame_stack).to receive(:push)
+      described_instance.start(dummy_state)
+    end
+
+    it 'should set last frame name' do
+      expect(dummy_frame).to receive(:name=)
+      described_instance.start(dummy_state)
+    end
+  end
+
+  describe '#stop' do
+    before :each do
+      allow(described_class).to receive(:nested_stream_name)
+      allow(described_instance).to receive(:commit!)
+    end
+
+    it 'should call span tracer trace_footer' do
+      expect(D13n::Metric::Stream::SpanTracerHelpers).to receive(:trace_footer)
+      described_instance.stop(dummy_state, 1000, dummy_frame)
+    end
+
+    context 'when ignore_this_stream' do
+      before :each do
+        described_instance.instance_variable_set(:@ignore_this_stream, true)
+        allow(D13n::Metric::Stream::SpanTracerHelpers).to receive(:trace_footer)
+      end
+
+      it 'should not call commit!' do
+        expect(described_instance).not_to receive(:commit!)
+        described_instance.stop(dummy_state, 1000, dummy_frame)
+      end
+    end
+
+    context 'when not ignore_this_stream' do
+      before :each do
+        described_instance.instance_variable_set(:@ignore_this_stream, false)
+        allow(D13n::Metric::Stream::SpanTracerHelpers).to receive(:trace_footer)
+      end
+
+      it 'should not call commit!' do
+        expect(described_instance).to receive(:commit!)
+        described_instance.stop(dummy_state, 1000, dummy_frame)
+      end
+    end
+
+    context 'when has children' do
+      before :each do
+        allow(D13n::Metric::Stream::SpanTracerHelpers).to receive(:trace_footer)
+        allow(described_instance).to receive(:commit!)
+        allow(dummy_frame).to receive(:name)
+        described_instance.instance_variable_set(:@has_children, true)
+      end
+
+      it 'should call nested_stream_name' do
+        allow(described_class).to receive(:nested_stream_name)
+        described_instance.stop(dummy_state, 1000, dummy_frame)
+      end
+
+    end
+  end
+
+  describe '#commit!' do
+    before :each do
+      allow(described_instance).to receive(:collect_metric_data)
+      allow(described_instance).to receive(:collect_metrics)
+    end
+
+    it 'should call collect_metric_data' do
+      expect(described_instance).to receive(:collect_metric_data)
+      described_instance.commit!(dummy_state, 1000)
+    end
+
+    it 'should call collect_metrics' do
+      expect(described_instance).to receive(:collect_metrics)
+      described_instance.commit!(dummy_state, 1000)
+    end
+  end
+
+  describe '#collect_metrics' do
+    before :each do
+      allow(D13n::Metric::Stream::StreamTracerHelpers).to receive(:collect_metrics)
+    end
+
+    it 'should call stream tracer' do
+      expect(D13n::Metric::Stream::StreamTracerHelpers).to receive(:collect_metrics)
+      described_instance.collect_metrics(dummy_state, {})
+    end
+  end
+
+  describe '#collect_metric_data' do
+    before :each do
+      allow(described_instance).to receive(:generate_metric_data)
+    end
+
+    it 'should call generate_metric_data' do
+      expect(described_instance).to receive(:generate_metric_data)
+      described_instance.collect_metric_data(dummy_state, {})
+    end
+  end
+
+  describe 
+  describe '#generate_error_data' do
+    before :each do
+      @dummy_metric_data = {}
+    end 
+
+    context 'when no error' do
+      before :each do
+        allow(described_instance).to receive(:had_error?).and_return(false)
+      end
+      it 'should unchange metric_data' do
+        old_metric_data = @dummy_metric_data.dup
+        described_instance.generate_error_data(@dummy_metric_data)
+        expect(@dummy_metric_data).to be_eql old_metric_data
+      end
+    end
+
+    context 'when error' do
+      before :each do
+        allow(described_instance).to receive(:had_error?).and_return(true)
+        described_instance.instance_variable_set(:@exceptions, {:error => 1})
+      end
+      it 'should unchange metric_data' do
+        described_instance.generate_error_data(@dummy_metric_data)
+        expect(@dummy_metric_data).to be_eql({
+          :error => true,
+          :errors => {:error => 1}
+        })
+      end
+    end
+  end
+  
+  describe '#default_metric_data' do
+    let(:dummy_frozen_name) {'frozen_name'}
+    let(:dummy_default_name) {'default_name'}
+    let(:dummy_error_data) {{:error => 1}}
+
+    before :each do
+      allow(described_instance).to receive(:generate_error_data)
+      allow(dummy_state).to receive(:referring_stream_id).and_return('aaa')
+      described_instance.instance_variable_set(:@default_name, dummy_default_name)
+      described_instance.instance_variable_set(:@uuid, 'ccc')
+    end
+
+    context 'when no referring_stream_id' do
+      before :each do
+        allow(dummy_state).to receive(:referring_stream_id).and_return(nil)
+        described_instance.instance_variable_set(:@state, dummy_state)
+      end
+      it 'should have default keys' do
+        expect(described_instance.default_metric_data).to include(:name, :uuid, :error)
+      end
+
+      it 'should have default name' do
+        expect(described_instance.default_metric_data[:name]).to be_eql(dummy_default_name)
+      end
+
+      it 'should have uuid' do
+        expect(described_instance.default_metric_data[:uuid]).to be_eql('ccc')
+      end
+
+      context 'when no error' do
+        it 'should have error false' do
+          expect(described_instance.default_metric_data[:error]).to be_falsey
+        end
+      end
+    end
+
+    context 'when referring_stream_id' do
+      before :each do
+        described_instance.instance_variable_set(:@state, dummy_state)
+      end
+
+      it 'should have referring_stream_id key' do
+        expect(described_instance.default_metric_data).to include(:name, :uuid, :error,:referring_stream_id)
+      end
+
+      it 'should have referring_stream_id value' do
+        expect(described_instance.default_metric_data[:referring_stream_id]).to be_eql('aaa') 
+      end
+    end
+  end
+
+  describe '#generate_default_metric_data' do
+    let(:dummy_default_metric_data) {{:default => true} }
+    
+    before :each do
+      allow(described_instance).to receive(:default_metric_data).and_return(dummy_default_metric_data)
+    end
+
+    it 'should have default keys' do
+      expect(described_instance.generate_default_metric_data(dummy_state, 100,200, {})).to include(:default, :type, :started_at, :duration)
+    end
+
+    it 'should have default type value' do
+      metric_data = {}
+      described_instance.generate_default_metric_data(dummy_state, 100, 200, metric_data)
+      expect(metric_data[:type]).to be_eql(:request)
+    end
+
+    it 'should have started_at value' do
+      metric_data = {}
+      described_instance.generate_default_metric_data(dummy_state, 100, 200, metric_data)
+      expect(metric_data[:started_at]).to be_eql(100)
+    end
+
+    it 'should have duration value' do
+      metric_data = {}
+      described_instance.generate_default_metric_data(dummy_state, 100, 200, metric_data)
+      expect(metric_data[:duration]).to be_eql(100)
+    end
+  end
+
+  describe '#generate_metric_data' do
+    before :each do
+      allow(described_instance).to receive(:generate_default_metric_data)
+      allow(described_instance).to receive(:append_apdex_perf_zone)
+      allow(described_instance).to receive(:append_web_response)
+    end
+
+    it 'should call generate_default_metric_data' do
+      expect(described_instance).to receive(:generate_default_metric_data)
+      described_instance.generate_metric_data(dummy_state, {}, 1000, 2000)
+    end
+
+    it 'should call append_apdex_perf_zone' do
+      expect(described_instance).to receive(:append_apdex_perf_zone)
+      described_instance.generate_metric_data(dummy_state, {}, 1000, 2000)
+    end
+
+    context 'when web transaction' do
+      before :each do
+        allow(described_instance).to receive(:recording_web_transaction?).and_return(true)
+      end
+      it 'should call append_web_response' do
+        expect(described_instance).to receive(:append_web_response)
+        described_instance.generate_metric_data(dummy_state, {}, 1000, 2000)
+      end
+    end
+
+    context 'when not web transaction' do
+      before :each do
+        allow(described_instance).to receive(:recording_web_transaction?).and_return(false)
+      end
+      it 'should call append_web_response' do
+        expect(described_instance).not_to receive(:append_web_response)
+        described_instance.generate_metric_data(dummy_state, {}, 1000, 2000)
+      end
+    end
+
+  end
 
   describe '#apdex_t' do
     before :each do
@@ -35,10 +296,6 @@ describe D13n::Metric::Stream do
   end
 
   describe '#stream_specific_apdex_t' do
-    before :each do
-     
-    end
-
     context 'when frozen_name available' do
       before :each do
         
@@ -57,8 +314,73 @@ describe D13n::Metric::Stream do
       end
     end
   end
+
   describe '#append_apdex_perf_zone' do
-    
+    before :each do
+      @dummy_metric_data = {}
+
+    end
+
+    context 'when bucket nil or false' do
+      before :each do
+        allow(described_instance).to receive(:apdex_bucket).and_return(nil)
+      end
+
+      it 'should return nil' do
+        expect(described_instance.append_apdex_perf_zone(100, @dummy_metric_data)).to be_nil
+      end
+
+      it 'should unchange metric_data' do
+        old_metric_data = @dummy_metric_data.dup
+        described_instance.append_apdex_perf_zone(100, @dummy_metric_data)
+        expect(@dummy_metric_data).to be_eql old_metric_data
+      end
+    end
+
+    context 'when bucket return :apdex_s' do
+      before :each do
+        allow(described_instance).to receive(:apdex_bucket).and_return(:apdex_s)
+      end
+
+      it 'should update metric_data with APDEX_S' do
+        described_instance.append_apdex_perf_zone(100, @dummy_metric_data)
+        expect(@dummy_metric_data[:apdex_perf_zone]).to be_eql described_class::APDEX_S
+      end
+    end
+
+    context 'when bucket return :apdex_t' do
+      before :each do
+        allow(described_instance).to receive(:apdex_bucket).and_return(:apdex_t)
+      end
+
+      it 'should update metric_data with APDEX_T' do
+        described_instance.append_apdex_perf_zone(100, @dummy_metric_data)
+        expect(@dummy_metric_data[:apdex_perf_zone]).to be_eql described_class::APDEX_T
+      end
+    end
+
+    context 'when bucket return :apdex_f' do
+      before :each do
+        allow(described_instance).to receive(:apdex_bucket).and_return(:apdex_f)
+      end
+
+      it 'should update metric_data with APDEX_F' do
+        described_instance.append_apdex_perf_zone(100, @dummy_metric_data)
+        expect(@dummy_metric_data[:apdex_perf_zone]).to be_eql described_class::APDEX_F
+      end
+    end
+
+    context 'when bucket other than above' do
+      before :each do
+        allow(described_instance).to receive(:apdex_bucket).and_return(:apdex)
+      end
+
+      it 'should unchange metric_data' do
+        old_metric_data = @dummy_metric_data.dup
+        described_instance.append_apdex_perf_zone(100, @dummy_metric_data)
+        expect(@dummy_metric_data).to be_eql old_metric_data
+      end
+    end
   end
 
   describe '#apdex_bucket' do
@@ -351,8 +673,6 @@ describe D13n::Metric::Stream do
         end
       end
     end
-
-
   end
 
   describe '#get_id' do
@@ -363,6 +683,169 @@ describe D13n::Metric::Stream do
     it 'should return uuid' do
       expect(described_instance.get_id).to be_eql 'ccc'
     end
+  end
+
+  describe '.st_current' do
+    before :each do
+      allow(D13n::Metric::StreamState).to receive(:st_get).and_return(dummy_state)
+      allow(dummy_state).to receive(:current_stream).and_return(described_instance)
+    end
+
+    it 'should return current stream' do
+      expect(described_class.st_current).to be_eql described_instance
+    end
+  end
+
+  describe '.start' do
+    context 'when exception' do
+      before :each do
+        allow(dummy_state).to receive(:current_stream).and_raise("error")
+      end
+
+      it 'should log in error' do
+        expect(D13n.logger).to receive(:error)
+        described_class.start(dummy_state, nil, {})
+      end
+
+      it 'should return nil' do
+        expect(described_class.start(dummy_state, nil, {})).to be_nil
+      end
+
+      it 'should return nil' do
+        expect {described_class.start(dummy_state, nil, {})}.not_to raise_error
+      end
+    end
+
+    context 'when stream available' do
+      before :each do
+        allow(dummy_state).to receive(:current_stream).and_return described_instance
+      end
+
+      it 'should call stream create_nested_stream' do
+        expect(described_instance).to receive(:create_nested_stream)
+        described_class.start(dummy_state, nil, {})
+      end
+    end
+
+    context 'when stream not available' do
+      before :each do
+        allow(dummy_state).to receive(:current_stream).and_return nil
+      end
+
+      it 'should call start_new_stream' do
+        expect(described_class).to receive(:start_new_stream)
+        described_class.start(dummy_state, nil, {})
+      end
+    end
+
+
+  end
+
+  describe '.start_new_stream' do
+    let(:new_state) {D13n::Metric::StreamState.new}
+    it 'should call state reset' do
+      expect(new_state).to receive(:reset)
+      described_class.start_new_stream(new_state, :controller, {})
+    end
+
+    it 'should save state in stream' do
+      stream = described_class.start_new_stream(new_state, :controller, {})
+      expect(stream.state).to be_eql(new_state)
+    end
+  end
+
+  describe '.stop' do
+    context 'when stream not avaliable' do
+      before :each do
+        allow(dummy_state).to receive(:current_stream).and_return nil
+      end
+
+      it 'should return nil' do
+        expect(described_class.stop(dummy_state)).to be_nil
+      end
+
+      it 'should call log error' do
+        expect(D13n.logger).to receive(:error)
+        described_class.stop(dummy_state)
+      end
+    end
+
+    context 'when stream avaliable' do
+      before :each do
+        allow(dummy_state).to receive(:current_stream).and_return described_instance
+        allow(described_instance).to receive(:frame_stack).and_return dummy_frame_stack
+        allow(dummy_state).to receive(:reset)
+        allow(described_instance).to receive(:stop)
+      end
+
+      context 'when frame stack empty' do
+        before :each do
+          allow(dummy_frame_stack).to receive(:empty?).and_return(true)
+        end
+
+        it 'should stop stream' do
+          expect(described_instance).to receive(:stop)
+          described_class.stop(dummy_state)
+        end
+
+        it 'should reset stream state' do
+          expect(dummy_state).to receive(:reset)
+          described_class.stop(dummy_state)
+        end
+      end
+
+      context 'when frame stack not empty' do
+        before :each do
+          allow(dummy_frame_stack).to receive(:empty?).and_return(false)
+          allow(described_class).to receive(:nested_stream_name)
+          allow(D13n::Metric::Stream::SpanTracerHelpers).to receive(:trace_footer)
+          allow(dummy_frame).to receive(:name)
+          allow(dummy_frame).to receive(:started_at).and_return(100)
+        end
+
+        it 'should call nested_stream_name' do
+          expect(described_class).to receive(:nested_stream_name)
+          described_class.stop(dummy_state)
+        end
+
+        it 'should call trace_footer' do
+          expect(D13n::Metric::Stream::SpanTracerHelpers).to receive(:trace_footer)
+          described_class.stop(dummy_state)
+        end
+
+      end
+    end
+  end
+
+  describe '.notice_error' do
+    let(:dummy_error_opt) {{:error => 1}}
+    before :each do
+      allow(D13n::Metric::StreamState).to receive(:st_get).and_return(dummy_state)
+    
+    end
+
+    context 'when stream available' do
+      before :each do
+        allow(dummy_state).to receive(:current_stream).and_return described_instance
+      end
+
+      it 'should call stream instance notice_error' do
+        expect(described_instance).to receive(:notice_error)
+        described_class.notice_error(RuntimeError, dummy_error_opt)
+      end
+    end
+
+    context 'when stream not available' do
+      before :each do
+        allow(dummy_state).to receive(:current_stream).and_return nil
+      end
+
+      it 'should call stream instance notice_error' do
+        expect(described_instance).not_to receive(:notice_error)
+        described_class.notice_error(RuntimeError, dummy_error_opt)
+      end
+    end
+
   end
 
   describe '.apdex_bucket' do
