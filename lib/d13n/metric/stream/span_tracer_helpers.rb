@@ -22,7 +22,7 @@ module D13n::Metric
         collector = D13n::Metric::Manager.instance
         collect_span_duration_timing(collector, state, first_name, duration, metric_data, options)
         collect_span_exclusive_timing(collector, state, first_name, exclusive, metric_data, options)
-        collect_span_exclusive_timing(collector, state, first_name, 1, exclusive, metric_data, options)
+        collect_span_request_count(collector, state, first_name, exclusive, metric_data, options)
       end
 
       def trace_header(state, t0)
