@@ -1,11 +1,24 @@
 require 'd13n/metric/stream_state'
 require 'd13n/metric/instrumentation/controller_instrumentation'
+require 'd13n/metric/stream/span_tracer_helpers'
+require 'securerandom'
+
 module D13n::Metric
   class Stream
 
     SINATRA_PREFIX = 'controller.sinatra'.freeze
+    MIDDLEWARE_PREFIX = 'controller.middleware'.freeze
 
-    attr_accessor :state, :started_at
+    WEB_TRANSACTION_CATEGORIES   = [:controller, :uri, :rack, :sinatra].freeze
+
+    APDEX_S = 'S'.freeze
+    APDEX_T = 'T'.freeze
+    APDEX_F = 'F'.freeze
+
+    attr_accessor :state, :started_at, :uuid
+    attr_accessor :http_response_code,
+                  :response_content_type,
+                  :response_content_length,
 
     def self.st_current
       StreamState.tl_get.current_stream
@@ -20,7 +33,13 @@ module D13n::Metric
 
     def self.start(state, category, options)
       category ||= :controller
-      stream = start_new_stream(state, category, options)
+      stream = state.current_stream
+
+      if stream 
+        stream.create_nested_stream(state, category, options)
+      else
+        stream = start_new_stream(state, category, options)
+      end
       stream
     rescue => e
       D13n.logger.error("Exception during Stream.start", e)
@@ -28,7 +47,7 @@ module D13n::Metric
     end
 
     def self.start_new_stream(state, category, options)
-      stream = Stream.new(category, options)
+      stream = new(category, options)
       state.reset(stream)
       stream.state = state
       stream.start(state)
@@ -36,6 +55,25 @@ module D13n::Metric
     end
 
     def self.stop(state, ended_time=Time.now)
+      stream = state.current_stream
+
+      if stream.nil?
+        D13n.logger.error("Failed during Stream.stop because there is no current stream")
+        return
+      end
+
+      nested_frame = stream.frame_stack.pop
+
+      if stream.frame_stack.empty?
+        stream.stop(state, ended_time, nested_frame)
+        state.reset
+      else
+        nested_name = nested_stream_name(nested_frame.name)
+
+        D13n::Metric::Stream::SpanTraceHelpers.trace_footer(state, nested_frame.started_at.to_i, nested_name, nested_frame, {})
+        ## Collect Metric
+      end
+      :stream_stopped
     end
 
     def self.notice_error(exception, options={})
@@ -43,6 +81,20 @@ module D13n::Metric
       stream = state.current_stream
       if stream
         stream.notice_error(exception, options)
+      end
+    end
+
+    def self.apdex_bucket(duration, failed, apdex_t)
+    
+      case
+      when failed
+        :apdex_f
+      when duration <= apdex_t
+        :apdex_s
+      when duration <= (4 * apdex_t)
+        :apdex_t
+      else
+        :apdex_f
       end
     end
 
@@ -58,10 +110,133 @@ module D13n::Metric
 
       @ignore_apdex = false
       @ignore_this_stream = false
+
+      @uuid = nil
+      @exceptions = {}
     end
 
     def start(state)
       @frame_stack.push D13n::Metric::Stream::SpanTraceHelpers.trace_helper(state, @started_at)
+      name_last_frame @default_name
+    end
+
+    def stop(state, ended_time, outermost_frame)
+      trace_options = {}
+      if @has_children
+        name = self.class.nested_stream_name(outermost_frame.name)
+      else
+        name = @frozen_name
+      end
+
+      D13n::Metric::Stream::SpanTraceHelpers.trace_footer(state, started_at.to_i, name, outermost_frame, trace_options, ended_time.to_i)
+      commit!(state, ended_time, name) unless @ignore_this_stream
+    end
+
+    def conmmit!(state, ended_time, name)
+      metric_data = {}
+      @metric_data = collect_apdex(state, ended_time, metric_data)
+      collect_metrics(state, @metric_data)
+    end
+
+    def apdex_t
+      stream_specific_apdex_t || D13n.config[:apdex_t]
+    end
+
+    def stream_specific_apdex_t
+      key = "web_stream_apdex_t.#{@frozen_name}".to_sym
+      D13n.config[key]
+    end
+
+    def collect_metrics(state, metric_data)
+      StreamTracerHelpers.collect_metrics(state, metric_data)
+    end
+
+    def collect_apdex(state, ended_time = Time.now.to_i)
+      total_duration = ended_time - @apdex_started_at
+      action_duration = ended_time - @started_at
+
+      collect_apdex_metric(total_duration, action_duration, apdex_t)
+      generate_metric_data(state, @started_at, ended_time)
+    end
+
+    def collect_apdex_metric(total_duration, action_duration, current_apdex_t)
+      apdex_bucket_global = apdex_bucket(total_duration, current_apdex_t)
+      apdex_bucket_stream = apdex_bucket(action_duration, current_apdex_t)
+    end
+
+    def default_metrice_data
+      metric_data = {
+        :name => @frozen_name || @default_name,
+        :uuid => @uuid,
+        :error => false
+      }
+
+      generate_error_data(state, metric_data)
+      metric_data[:referring_stream_id] if @state.referring_stream_id
+      metric_data
+    end
+
+    def generate_error_data(state, metric_data)
+      if had_error?
+        metric_data.merge!({
+         :error => true,
+         :errors => @exceptions 
+        })
+      end
+    end
+
+    def generate_default_metric_data(state, started_at, ended_time, metric_data)
+      duration = ended_time.to_i - started_at.to_i
+
+      metric_data = default_metric_data.merge({
+        :type => :request,
+        :started_at => @started_at.to_i,
+        :duration => duration,
+      })
+      metric_data
+    end
+
+    def generate_metric_data(state, started_at, ended_time, metric_data)
+      generate_default_metric_data(state, started_at, ended_time, metric_data)
+      append_apdex_perf_zone(duration, metric_data)
+      append_web_response(@http_response_code, @response_content_type, @response_content_length, metric_data) if recording_web_transaction?
+      metric_data
+    end
+
+    def had_error?
+      !@exceptions.empty?
+    end
+
+    def had_exception_affecting_apdex?
+      # all exceptions are affecting
+      had_error?  
+    end
+
+    def apdex_bucket(duration, current_apdex_t)
+      self.class.apdex_bucket(duration, had_exception_affecting_apdex?, current_apdex_t)
+    end
+
+    def append_apdex_perf_zone(duration, metric_data)
+      bucket = apdex_bucket(duration, apdex_t)
+
+      return unless bucket
+
+      bucket_str = case bucket
+      when :apdex_s then APDEX_S
+      when :apdex_t then APDEX_T
+      when :apdex_f then APDEX_F
+      else nil
+      end
+
+      metric_data[:apdex_perf_zone] = bucket_str if bucket_str
+    end
+
+    def append_web_response(http_response_code,response_content_type,response_content_length,metric_data)
+      return if http_response_code.nil?
+
+      metric_data[:http_response_code] = http_response_code
+      metric_data[:http_response_content_type] = response_content_type
+      metric_data[:http_response_content_length] = response_content_length
     end
 
     def make_stream_name(name, category=nil)
@@ -84,6 +259,48 @@ module D13n::Metric
       else
         @exceptions[exception] = options
       end
+    end
+
+    def create_nested_stream(state, category, options)
+      @has_children = true
+
+      @frame_stack.push D13n::Metric::Stream::SpanTracerHelpers.trace_header(state, Time.now.to_i)
+      name_last_frame(options[:stream_name])
+
+      set_default_stream_name(options[:stream_name], category)
+    end
+
+    def set_default_stream_name(name, category)
+      return if name_frozen?
+      @default_name = name
+      @category = category if category
+    end
+
+    def name_frozen?
+      @frozen_name ? true : false
+    end
+
+    def name_last_frame(name)
+      @frame_stack.last.name = name
+    end
+
+    def recording_web_transaction?
+      web_category?(@category)
+    end
+
+    def web_category?(category)
+      WEB_TRANSACTION_CATEGORIES.include?(category)
+    end
+
+    def get_id
+      uuid
+    end
+
+    def uuid
+      return @uuid if @uuid
+      request_info = StreamState.request_info
+      @uuid = request_info["request_id"].nil? ? SecureRandom.hex(16) : request_info["request_id"]
+      @uuid
     end
   end
 end
