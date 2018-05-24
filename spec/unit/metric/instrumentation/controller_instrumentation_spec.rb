@@ -246,13 +246,12 @@ describe D13n::Metric::Instrumentation::ControllerInstrumentation do
 
     context 'when http in tracable false' do
       before :each do
-        allow(::D13n::Metric::Helper).to receive(:http_in_tracable?).and_return(true)
+        allow(::D13n::Metric::Helper).to receive(:http_in_tracable?).and_return(false)
       end
+
       it 'should return without call hook' do
         @dummy_class.new.dummy_action_with_hook
         expect(D13n::Metric::Stream).not_to receive(:start)
-
-        
       end
     end
   end
