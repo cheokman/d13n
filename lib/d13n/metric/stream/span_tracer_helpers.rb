@@ -1,3 +1,4 @@
+require 'd13n/metric/stream/stream_tracer_helpers'
 module D13n::Metric
   class Stream
     module SpanTracerHelpers
@@ -26,13 +27,13 @@ module D13n::Metric
       end
 
       def trace_header(state, t0)
-        stack = state.trace_span_stack
+        stack = state.traced_span_stack
         stack.push_frame(state, :span_tracer, t0)
       end
 
       def trace_footer(state, t0, first_name, expected_frame, options, t1=Time.now.to_i)
         if expected_frame
-          stack = state.trace_span_stack
+          stack = state.traced_span_stack
           frame = stack.pop_frame(state, expected_frame, first_name, t1)
           duration, exclusive = get_timings(t0, t1, frame)
           metric_data = {}

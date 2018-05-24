@@ -9,14 +9,14 @@ describe D13n::Metric::Stream::SpanTracerHelpers do
 
   before :each do
     allow(dummy_stack).to receive(:push_frame)
-    allow(dummy_state).to receive(:trace_span_stack).and_return(dummy_stack)
+    allow(dummy_state).to receive(:traced_span_stack).and_return(dummy_stack)
     allow(dummy_state).to receive(:push_frame)
     allow(dummy_stack).to receive(:pop_frame).and_return(dummy_frame)
   end
 
   describe "#trace_header" do
     it 'should call state trace_span_stack' do
-      expect(dummy_state).to receive(:trace_span_stack)
+      expect(dummy_state).to receive(:traced_span_stack)
       described_class.trace_header(dummy_state, 1)
     end
 
