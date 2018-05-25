@@ -11,12 +11,12 @@ module D13n::Metric
       end
     end
 
-    class TracedStack
+    class TracedSpanStack
       def initialize
         @stack = []
       end
 
-      def push_frame(state, tag, time = Time.now.to_f)
+      def push_frame(state, tag, time = Time.now.to_i)
         frame = StackFrame.new(tag, time)
         @stack.push frame
         frame

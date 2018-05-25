@@ -1,5 +1,5 @@
 require 'spec_helper'
-require 'd13n/metric/stream/traced_stack'
+require 'd13n/metric/stream/traced_span_stack'
 describe D13n::Metric::Stream::StackFrame do
   before :each do
     @start_time = Time.now
@@ -19,7 +19,7 @@ describe D13n::Metric::Stream::StackFrame do
   end
 end
 
-describe D13n::Metric::Stream::TracedStack do
+describe D13n::Metric::Stream::TracedSpanStack do
   before :each do
     @instance = described_class.new
     @state = double()
