@@ -9,8 +9,9 @@ module D13n::Metric::Instrumentation
 
       begin
         D13n::Metric::Stream.start(state, category, build_stream_options(env, first_middleware))
-       
-        result = (target == self) ? traced_call(env) : target.call(env)
+        state.notify_rack_call(env) if first_middleware
+
+        result = (@target == self) ? traced_call(env) : @target.call(env)
 
         if first_middleware
           capture_response_attributes(state, result)
@@ -49,27 +50,29 @@ module D13n::Metric::Instrumentation
       end
     end
 
-    def capture_response_attribute(state, result)
+    def capture_response_attributes(state, result)
       capture_response_code(state, result)
       capture_response_content_type(state, result)
       capture_response_content_length(state, result)
     end
+    #
+    #  stream_name, apdex_started_at, request
+    #
 
     def build_stream_options(env, first_middleware)
-      opts = transaction_options
+      opts = @stream_options
       opts = merge_first_middleware_options(opts, env) if first_middleware
       opts
     end
 
     def merge_first_middleware_options(opts, env)
       opts[:apdex_started_at] = parse_request_timestamp(env)
-
       opts[:request] = ::Rack::Request.new(env) if defined?(::Rack)
       opts
     end
 
     def parse_request_timestamp(env)
-      Time.now
+      Time.now.to_i
     end
 
     def stream_started(env)
