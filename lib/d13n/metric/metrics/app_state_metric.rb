@@ -19,8 +19,8 @@ module D13n::Metric
         tags << "name:#{exception.class.name}"
         tags << "at:#{opts.fetch(:at, 'runtime')}"
         tags << "src:#{opts.fetch(:src, 'app')}"
-        tags << "uuid: #{opts.fetch(:uuid, 'unknown')}"
-        tags << "stream_id: #{opts[:referring_stream_id] || opts.fetch(:uuid, 'unknown'))}"
+        tags << "uuid:#{opts.fetch(:uuid, 'unknown')}"
+        tags << "stream_id:#{opts[:referring_stream_id] || opts.fetch(:uuid, 'unknown')}"
         tags
       end
     end
