@@ -53,32 +53,35 @@ describe D13n::Metric::Instrumentation::MiddlewareTracing do
   describe '#call' do
    let(:dummy_env) { double() }
    let(:dummy_state) { double() }
+   let(:dummy_logger) { double() }
    
     before :each do
       allow(D13n::Metric::StreamState).to receive(:st_get).and_return(dummy_state)
       allow(D13n::Metric::Stream).to receive(:start)
       allow(D13n::Metric::Stream).to receive(:stop)
+      # allow(dummy_logger).to receive(:error)
+      # allow(D13n).to receive(:logger).and_return(dummy_logger)
       allow_any_instance_of(DummyMiddleware).to receive(:stream_started)
     end
 
-    describe 'when exception accurred' do
+    context 'when exception occurred' do
       before :each do
         allow(D13n::Metric::Stream).to receive(:start).and_raise(ArgumentError)
       end
 
-      it 'should call logger for error' do
+      it 'should raise exception' do
         expect {dm_instance.call(dummy_env)}.to raise_error(ArgumentError)
       end
 
-      it 'should call logger for error' do
+      xit 'should call logger for error' do
         expect(D13n.logger).to receive(:error)
         begin
-        dm_instance.call(dummy_env)
-        rescue => e
+          dm_instance.call(dummy_env)
+          rescue => e
         end
       end
 
-      it 'should call logger for error' do
+      it 'should stream stop' do
         expect(D13n::Metric::Stream).to receive(:stop)
         begin
         dm_instance.call(dummy_env)
@@ -86,9 +89,49 @@ describe D13n::Metric::Instrumentation::MiddlewareTracing do
         end
       end
     end
+
+    context 'when no exception' do
+      context 'when first middleware' do
+        let(:dummy_target) {double()}
+        before :each do
+          allow_any_instance_of(DummyMiddleware).to receive(:stream_started).and_return(true)
+          allow(dummy_target).to receive(:call)
+          allow(dummy_state).to receive(:notify_rack_call)
+          dm_instance.instance_variable_set(:@stream_options, {})
+          dm_instance.instance_variable_set(:@target, dummy_target)
+        end
+
+        it 'should call notify_rack_call' do
+          expect(dummy_state).to receive(:notify_rack_call)
+          dm_instance.call(dummy_env)
+        end
+
+        it 'should call capture_response_attributes' do
+          expect(dm_instance).to receive(:capture_response_attributes)
+          dm_instance.call(dummy_env)
+        end
+
+        context 'when target is self' do
+          before :each do
+            dm_instance.instance_variable_set(:@target, dm_instance)
+          end
+          it 'should call traced_call' do
+            expect(dm_instance).to receive(:traced_call)
+            dm_instance.call(dummy_env)
+          end
+        end
+
+        context 'when target is not self' do
+          it 'should call taget call' do
+            expect(dummy_target).to receive(:call)
+            dm_instance.call(dummy_env)
+          end
+        end
+      end
+    end
   end
 
-  describe '#capture_response_attribute' do
+  describe '#capture_response_attributes' do
     
     let(:state) { double() }
     let(:result) { double() }
@@ -100,17 +143,17 @@ describe D13n::Metric::Instrumentation::MiddlewareTracing do
 
     it 'should call capture response code' do
       expect(dm_instance).to receive(:capture_response_code)
-      dm_instance.capture_response_attribute(state, result)
+      dm_instance.capture_response_attributes(state, result)
     end
 
     it 'should call capture response content length' do
       expect(dm_instance).to receive(:capture_response_content_length)
-      dm_instance.capture_response_attribute(state, result)
+      dm_instance.capture_response_attributes(state, result)
     end
 
     it 'should call capture response content type' do
       expect(dm_instance).to receive(:capture_response_content_type)
-      dm_instance.capture_response_attribute(state, result)
+      dm_instance.capture_response_attributes(state, result)
     end
   end
 
@@ -169,6 +212,19 @@ describe D13n::Metric::Instrumentation::MiddlewareTracing do
       dm_instance.capture_response_content_type(dummy_state, dummy_result)
     end
   end
-
   
+  describe '#capture_response_content_length' do
+    context 'valid result parameter' do
+      let(:dummy_result) { ['',{described_class::CONTENT_LENGTH => 10},'']}
+      before :each do
+        allow(dummy_stream).to receive(:response_content_length=)
+        allow(dummy_state).to receive(:current_stream).and_return(dummy_stream)
+      end
+
+      it "should call response_content_length" do
+        expect(dummy_stream).to receive(:response_content_length=).with(10)
+        dm_instance.capture_response_content_length(dummy_state, dummy_result)
+      end
+    end
+  end
 end
