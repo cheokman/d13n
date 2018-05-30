@@ -185,7 +185,7 @@ module D13n
     end
 
     def state
-      D13n::Operation::State.opt_get
+      D13n::Metric::StreamState.st_get
     end
     
     def request_id
