@@ -71,6 +71,7 @@ module D13n
 end
 
 require 'd13n/ext/string'
+require 'd13n/metric'
 require 'd13n/logger'
 require 'd13n/configuration'
 require 'd13n/application'
