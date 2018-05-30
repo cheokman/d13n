@@ -1,3 +1,4 @@
+require 'd13n/metric/instrumentation/controller_instrumentation'
 module D13n
   module Rack
     class D13nMiddleware
@@ -5,15 +6,15 @@ module D13n
       def initialize(app, options={})
         @app = app
         @category = :middleware
-        @target   = self
+        @target  = self
         @stream_options = {
           :stream_name => build_stream_name
         }
       end
 
       def build_stream_name
-        prefix = ::D13n::Metric::Instrumentation::ControllerInstrumentation::StreamNamer.prefix_for_catory(nil, @category)
-        "#{profix}.#{self.class.name}.call"
+        prefix = ::D13n::Metric::Instrumentation::ControllerInstrumentation::StreamNamer.prefix_for_category(nil, @category)
+        "#{prefix}.#{self.class.name}.call"
       end
     end
   end
