@@ -51,6 +51,7 @@ module D13n
       log_startup
       query_server_for_configuration
       start_metric_manager
+      log_version_and_pid
       start_api_service
     end
 
