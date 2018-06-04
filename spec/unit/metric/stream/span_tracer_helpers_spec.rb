@@ -53,7 +53,7 @@ describe D13n::Metric::Stream::SpanTracerHelpers do
 
     context 'when not nil expected_frame' do
       before :each do 
-        allow(described_class).to receive(:collect_metrics)
+        allow(described_class).to receive(:collect_span_metrics)
       end
       context 'when duration less than max allowed metric duration' do
         before :each do
@@ -74,7 +74,7 @@ describe D13n::Metric::Stream::SpanTracerHelpers do
             end
 
             it 'should collect metric' do
-              expect(described_class).to receive(:collect_metrics)
+              expect(described_class).to receive(:collect_span_metrics)
               described_class.trace_footer(dummy_state, 1000, 'first_name', dummy_frame, {})
             end
 
@@ -90,7 +90,7 @@ describe D13n::Metric::Stream::SpanTracerHelpers do
           end
 
           it 'should collect metric' do
-            expect(described_class).to receive(:collect_metrics)
+            expect(described_class).to receive(:collect_span_metrics)
             described_class.trace_footer(dummy_state, 1000, 'first_name', dummy_frame, {})
           end
 
@@ -107,7 +107,7 @@ describe D13n::Metric::Stream::SpanTracerHelpers do
           allow(dummy_frame).to receive(:children_time).and_return(100)
         end
         it 'should not collect metric' do
-          expect(described_class).not_to receive(:collect_metrics)
+          expect(described_class).not_to receive(:collect_span_metrics)
           described_class.trace_footer(dummy_state, 1000, 'first_name', dummy_frame, {})
         end
 
@@ -166,25 +166,25 @@ describe D13n::Metric::Stream::SpanTracerHelpers do
       end
     end
 
-    describe '#collect_metrics' do
+    describe '#collect_span_metrics' do
       it 'should get collector' do
         expect(D13n::Metric::Manager).to receive(:instance)
-        described_class.collect_metrics(dummy_state,'first_name', 100,100,{},{})
+        described_class.collect_span_metrics(dummy_state,'first_name', 100,100,{},{})
       end
 
       it 'should call collect_span_duration_timing' do
         expect(described_class).to receive(:collect_span_duration_timing)
-        described_class.collect_metrics(dummy_state,'first_name', 100,100,{},{})
+        described_class.collect_span_metrics(dummy_state,'first_name', 100,100,{},{})
       end
 
       it 'should call collect_span_exclusive_timing' do
         expect(described_class).to receive(:collect_span_exclusive_timing)
-        described_class.collect_metrics(dummy_state,'first_name', 100,100,{},{})
+        described_class.collect_span_metrics(dummy_state,'first_name', 100,100,{},{})
       end
 
       it 'should call collect_span_request_count' do
         expect(described_class).to receive(:collect_span_request_count)
-        described_class.collect_metrics(dummy_state,'first_name', 100,100,{},{})
+        described_class.collect_span_metrics(dummy_state,'first_name', 100,100,{},{})
       end
     end
   end
