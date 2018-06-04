@@ -10,7 +10,6 @@ module D13n::Metric::Instrumentation
       begin
         D13n::Metric::Stream.start(state, category, build_stream_options(env, first_middleware))
         state.notify_rack_call(env) if first_middleware
-
         result = (@target == self) ? traced_call(env) : @target.call(env)
 
         if first_middleware
@@ -27,6 +26,7 @@ module D13n::Metric::Instrumentation
     end
 
     def capture_response_code(state, result)
+      
       if result.is_a?(Array) && state.current_stream
         state.current_stream.http_response_code = result[0]
       end
@@ -72,7 +72,7 @@ module D13n::Metric::Instrumentation
     end
 
     def parse_request_timestamp(env)
-      Time.now.to_i
+      Time.now.to_f
     end
 
     def stream_started(env)
