@@ -74,9 +74,14 @@ describe D13n::Metric::Instrumentation::Sinatra do
 
   describe 'included class' do
     subject { dummy_app }
-
     it { is_expected.to respond_to(:websocket_with_d13n_instrumentation)}
     it { is_expected.to respond_to(:build_with_d13n_instrumentation)}
+  end
+
+  describe 'included class' do
+    subject { dummy_app_instance }
+
+  
     it { is_expected.to respond_to(:process_route_with_d13n_instrumentation)}
     it { is_expected.to respond_to(:dispatch_with_d13n_instrumentation)}
     it { is_expected.to respond_to(:dispatch_and_notice_errors_with_d13n_instrumentation)}
@@ -85,7 +90,7 @@ describe D13n::Metric::Instrumentation::Sinatra do
   describe '.d13n_middlewares' do
     context 'when middleware enable true' do
       before :each do
-        allow(D13n::Rack::MetricMiddleware).to receive(:enable?).and_return(true)
+        allow(D13n::Rack::MetricMiddleware).to receive(:enabled?).and_return(true)
       end
 
       subject { dummy_app.d13n_middlewares }
@@ -95,7 +100,7 @@ describe D13n::Metric::Instrumentation::Sinatra do
 
     context 'when middleware enable false' do
       before :each do
-        allow(D13n::Rack::MetricMiddleware).to receive(:enable?).and_return(false)
+        allow(D13n::Rack::MetricMiddleware).to receive(:enabled?).and_return(false)
       end
 
       subject { dummy_app.d13n_middlewares }
@@ -145,39 +150,39 @@ describe D13n::Metric::Instrumentation::Sinatra do
 
   describe '.process_route_with_d13n_instrumentation' do
     before :each do
-      allow(dummy_app).to receive(:env)
-      allow(dummy_app).to receive(:process_route_without_d13n_instrumentation)
+      allow(dummy_app_instance).to receive(:env)
+      allow(dummy_app_instance).to receive(:process_route_without_d13n_instrumentation)
       RSpec::Mocks.configuration.allow_message_expectations_on_nil = true
     end
 
     context 'when exception occurred' do
       it 'should log the information in logger debug level' do
         expect(D13n.logger).to receive(:debug)
-        dummy_app.process_route_with_d13n_instrumentation
+        dummy_app_instance.process_route_with_d13n_instrumentation
       end
 
       it 'should call original process_route' do
-        expect(dummy_app).to receive(:process_route_without_d13n_instrumentation)
-        dummy_app.process_route_with_d13n_instrumentation
+        expect(dummy_app_instance).to receive(:process_route_without_d13n_instrumentation)
+        dummy_app_instance.process_route_with_d13n_instrumentation
       end
     end
 
     context 'when first argument given' do
       it 'should assign first argument as last rount in env' do
-        expect(dummy_app.env).to receive(:[]=).with('d13n.last_route', 'dummy_route')
-        dummy_app.process_route_with_d13n_instrumentation('dummy_route')
+        expect(dummy_app_instance.env).to receive(:[]=).with('d13n.last_route', 'dummy_route')
+        dummy_app_instance.process_route_with_d13n_instrumentation('dummy_route')
       end
 
       it 'should call original process_route' do
-        expect(dummy_app).to receive(:process_route_without_d13n_instrumentation)
-        dummy_app.process_route_with_d13n_instrumentation
+        expect(dummy_app_instance).to receive(:process_route_without_d13n_instrumentation)
+        dummy_app_instance.process_route_with_d13n_instrumentation
       end
     end
   end
 
   describe '.route_eval_with_d13n_instrumentation' do
     before :each do
-      allow(dummy_app).to receive(:route_eval_without_d13n_instrumentation)
+      allow(dummy_app_instance).to receive(:route_eval_without_d13n_instrumentation)
     end
 
     context 'when stream_name nil' do
@@ -187,31 +192,31 @@ describe D13n::Metric::Instrumentation::Sinatra do
 
       it 'should not call set_default_stream_name' do
         expect(::D13n::Metric::Stream).not_to receive(:set_default_stream_name)
-        dummy_app.route_eval_with_d13n_instrumentation
+        dummy_app_instance.route_eval_with_d13n_instrumentation
       end
 
       it 'should call route_eval_without_d13n_instrumentation' do
-        expect(dummy_app).to receive(:route_eval_without_d13n_instrumentation)
-        dummy_app.route_eval_with_d13n_instrumentation
+        expect(dummy_app_instance).to receive(:route_eval_without_d13n_instrumentation)
+        dummy_app_instance.route_eval_with_d13n_instrumentation
       end
     end
 
     context 'when stream_name not nil' do
       before :each do
-        allow(dummy_app).to receive(:env)
-        allow(dummy_app).to receive(:request)
+        allow(dummy_app_instance).to receive(:env)
+        allow(dummy_app_instance).to receive(:request)
         allow(D13n::Metric::Instrumentation::Sinatra::StreamNamer).to receive(:for_route).and_return('dummy_name')
         allow(::D13n::Metric::Stream).to receive(:set_default_stream_name)
       end
         
       it 'should call set_default_stream_name for stream' do
         expect(::D13n::Metric::Stream).to receive(:set_default_stream_name)
-        dummy_app.route_eval_with_d13n_instrumentation
+        dummy_app_instance.route_eval_with_d13n_instrumentation
       end
 
       it 'should call route_eval_without_d13n_instrumentation' do
-        expect(dummy_app).to receive(:route_eval_without_d13n_instrumentation)
-        dummy_app.route_eval_with_d13n_instrumentation
+        expect(dummy_app_instance).to receive(:route_eval_without_d13n_instrumentation)
+        dummy_app_instance.route_eval_with_d13n_instrumentation
       end
     end
 
@@ -222,8 +227,8 @@ describe D13n::Metric::Instrumentation::Sinatra do
       end
 
       it 'should call route_eval_without_d13n_instrumentation' do
-        expect(dummy_app).to receive(:route_eval_without_d13n_instrumentation)
-        dummy_app.route_eval_with_d13n_instrumentation
+        expect(dummy_app_instance).to receive(:route_eval_without_d13n_instrumentation)
+        dummy_app_instance.route_eval_with_d13n_instrumentation
       end
     end
   end
@@ -233,16 +238,16 @@ describe D13n::Metric::Instrumentation::Sinatra do
     let(:dummy_request) { double('dummy_request') }
     let(:dummy_filter_params) { double('dummy_filter_params')}
     before :each do
-      allow(dummy_app).to receive(:get_request_params).and_return(dummy_request_params)
-      allow(dummy_app).to receive(:request).and_return(dummy_request)
+      allow(dummy_app_instance).to receive(:get_request_params).and_return(dummy_request_params)
+      allow(dummy_app_instance).to receive(:request).and_return(dummy_request)
       allow(D13n::Metric::Instrumentation::Sinatra::StreamNamer).to receive(:initial_stream_name).and_return('dummy_name')
-      allow(dummy_app).to receive(:get_filter_parames).and_return(dummy_filter_params)
-      allow(dummy_app).to receive(:perform_action_with_d13n_stream)
+      allow(dummy_app_instance).to receive(:get_filter_parames).and_return(dummy_filter_params)
+      allow(dummy_app_instance).to receive(:perform_action_with_d13n_stream)
     end
 
     it 'should call perform_action_with_d13n_stream' do
-      expect(dummy_app).to receive(:perform_action_with_d13n_stream)
-      dummy_app.dispatch_with_d13n_instrumentation
+      expect(dummy_app_instance).to receive(:perform_action_with_d13n_stream)
+      dummy_app_instance.dispatch_with_d13n_instrumentation
     end
   end
 
@@ -251,31 +256,31 @@ describe D13n::Metric::Instrumentation::Sinatra do
     context 'when normal' do
       before :each do
         allow(dummy_request).to receive(:params).and_return("dummy_params")
-        dummy_app.instance_variable_set(:@request, dummy_request)
+        dummy_app_instance.instance_variable_set(:@request, dummy_request)
       end
 
       it 'should return dummy params' do
-        expect(dummy_app.get_request_params).to be_eql "dummy_params"
+        expect(dummy_app_instance.get_request_params).to be_eql "dummy_params"
       end
     end
 
     context 'when error' do
       before :each do
         allow(dummy_request).to receive(:params).and_raise
-        dummy_app.instance_variable_set(:@request, dummy_request)
+        dummy_app_instance.instance_variable_set(:@request, dummy_request)
       end
 
       it 'should not raise error' do
-        expect {dummy_app.get_request_params}.not_to raise_error
+        expect {dummy_app_instance.get_request_params}.not_to raise_error
       end
 
       it 'should return ni' do
-        expect(dummy_app.get_request_params).to be_nil
+        expect(dummy_app_instance.get_request_params).to be_nil
       end
 
       it 'should logger in debug' do
         expect(D13n.logger).to receive(:debug)
-        dummy_app.get_request_params
+        dummy_app_instance.get_request_params
       end
     end
   end
