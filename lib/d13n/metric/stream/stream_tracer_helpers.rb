@@ -95,14 +95,14 @@ module D13n::Metric
         collector.increment(metric_name("count"), count, sample_rate: rate, tags: stream_http_response_content_type_tags(metric_data))
       end
 
-      def collect_response_content_length_metric(collector, state, guage, metric_data, rate=1.0)
-        collector.guage(metric_name("guage"), guage, sample_rate: rate, tags: stream_http_response_content_length_tags(metric_data))
+      def collect_response_content_length_metric(collector, state, gauge, metric_data, rate=1.0)
+        collector.gauge(metric_name("gauge"), gauge, sample_rate: rate, tags: stream_http_response_content_length_tags(metric_data))
       end
 
       def collect_response_metric(collector, state, metric_data)
         collect_repsonse_code_metric(collector, state, metric_data)
         collect_response_content_type_metric(collector, state, metric_data)
-        collect_response_content_length_metric(collector, state, metric_data[:http_response_content_lenght], metric_data)
+        collect_response_content_length_metric(collector, state, metric_data[:http_response_content_length], metric_data)
       end
 
       def collect_error_metric(collector, state, error, metric_data, count=1, rate=1.0 )
@@ -117,11 +117,11 @@ module D13n::Metric
         end
       end
 
-      def collect_metric(state, metric_data)
+      def collect_metrics(state, metric_data)
         collector = D13n::Metric::Manager.instance
         collect_duration_metric(collector, state, metric_data[:duration], metric_data)
         collect_exclusive_metric(collector, state, metric_data[:exclusive], metric_data)
-        collect_apdex_metric(collector, state, 1, metric_data)
+        collect_apdex_metric(collector, state, metric_data)
         collect_response_metric(collector, state, metric_data)
         collect_errors_metric(collector, state, metric_data) if metric_data[:error]
       end
