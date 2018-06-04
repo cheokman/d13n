@@ -1,4 +1,4 @@
-#require 'config-kit'
+require 'config_kit'
 
 module D13n
   class Service
@@ -31,7 +31,7 @@ module D13n
       end
 
       def log_version_and_pid
-        D13n.logger.debug "#{D13n.config.app_name} Service #{D13n.version}(D13n:#{D13n::VERSION::STRING}) Initialized: pid = #{$$}"
+        D13n.logger.debug "#{D13n.config.app_name} Service #{D13n.service.app_class::VERSION}(D13n:#{D13n::VERSION::STRING}) Initialized: pid = #{$$}"
       end
 
       def query_server_for_configuration
