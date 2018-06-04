@@ -18,7 +18,7 @@ D13n::Metric::Instrumentation::Conductor.direct do
         wrapped_request = D13n::Metric::HTTPClients::NetHTTPClientRequest.new(self, request)
         manager = D13n::Metric::Manager.instance
         metric = manager.metric(:app_http)
-        
+
         if metric.nil?
           D13n.logger.info "Null intrumentation metric class and ignore collection"
           return request_without_d13n_instrumentation(request, *args, &block) 

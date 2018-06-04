@@ -152,7 +152,7 @@ module D13n::Metric
         
         t1 = Time.now
         duration = t1.to_f - t0.to_f
-
+        
         begin
           scoped_metric = get_service_endpoint(request).join('.')
           node.name = scoped_metric if node
