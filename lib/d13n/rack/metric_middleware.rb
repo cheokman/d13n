@@ -7,7 +7,7 @@ module D13n
       include D13n::Metric::Instrumentation::MiddlewareTracing
       
       def self.enabled?
-        !D13n.config[:'metric.app.http.in.tracable']
+        D13n.config[:'metric.app.http.in.tracable']
       end
   
       def traced_call(env)
