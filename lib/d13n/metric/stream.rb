@@ -1,5 +1,6 @@
 require 'd13n/metric/stream_state'
 require 'd13n/metric/instrumentation/controller_instrumentation'
+require 'd13n/metric/stream/stream_tracer_helpers'
 require 'd13n/metric/stream/span_tracer_helpers'
 require 'securerandom'
 
@@ -18,7 +19,7 @@ module D13n::Metric
     attr_accessor :state, :started_at, :uuid
     attr_accessor :http_response_code,
                   :response_content_type,
-                  :response_content_length,
+                  :response_content_length, :frame_stack
 
     def self.st_current
       StreamState.st_get.current_stream
@@ -54,26 +55,27 @@ module D13n::Metric
       stream
     end
 
-    def self.stop(state, ended_time=Time.now.to_i)
+    def self.stop(state, ended_time=Time.now.to_f)
       stream = state.current_stream
-
       if stream.nil?
         D13n.logger.error("Failed during Stream.stop because there is no current stream")
         return
       end
 
       nested_frame = stream.frame_stack.pop
-
       if stream.frame_stack.empty?
         stream.stop(state, ended_time, nested_frame)
         state.reset
       else
         nested_name = nested_stream_name(nested_frame.name)
-
-        D13n::Metric::Stream::SpanTracerHelpers.trace_footer(state, nested_frame.started_at.to_i, nested_name, nested_frame, {})
-        ## Collect Metric
+        begin
+          D13n::Metric::Stream::SpanTracerHelpers.trace_footer(state, nested_frame.start_time.to_f, nested_name, nested_frame, {})
+        rescue => e
+          D13n.logger.debug "Error in trace_footer #{e}"
+        end
       end
-      :stream_stopped
+
+      #:stream_stopped
     end
 
     def self.notice_error(exception, options={})
@@ -98,11 +100,15 @@ module D13n::Metric
       end
     end
 
+    def self.nested_stream_name(name)
+      name
+    end
+
     def initialize(category, options)
       @frame_stack = []
 
       @category = category
-      @started_at = Time.now.to_i
+      @started_at = Time.now.to_f
 
       @default_name = options[:stream_name]
       
@@ -128,12 +134,14 @@ module D13n::Metric
         name = @frozen_name
       end
 
-      D13n::Metric::Stream::SpanTracerHelpers.trace_footer(state, started_at.to_i, name, outermost_frame, trace_options, ended_time.to_i)
-      commit!(state, ended_time) unless @ignore_this_stream
+      D13n::Metric::Stream::SpanTracerHelpers.trace_footer(state, @started_at.to_f, name, outermost_frame, trace_options, ended_time.to_f)
+      duration = ended_time - @started_at
+      exclusive = duration - outermost_frame.children_time
+      commit!(state, exclusive, ended_time) unless @ignore_this_stream
     end
 
-    def commit!(state, ended_time)
-      @metric_data = {}
+    def commit!(state, exclusive, ended_time)
+      @metric_data = {:exclusive => exclusive}
       collect_metric_data(state, @metric_data, ended_time)
       collect_metrics(state, @metric_data)
     end
@@ -151,9 +159,9 @@ module D13n::Metric
       StreamTracerHelpers.collect_metrics(state, metric_data)
     end
 
-    def collect_metric_data(state, metric_data, ended_time = Time.now.to_i)
+    def collect_metric_data(state, metric_data, ended_time = Time.now.to_f)
       total_duration = ended_time - @apdex_started_at
-      action_duration = ended_time - @started_at.to_i
+      action_duration = ended_time - @started_at.to_f
 
       # collect_apdex_metric(total_duration, action_duration, apdex_t)
       generate_metric_data(state, metric_data, @started_at, ended_time)
@@ -267,7 +275,7 @@ module D13n::Metric
     def create_nested_stream(state, category, options)
       @has_children = true
 
-      @frame_stack.push D13n::Metric::Stream::SpanTracerHelpers.trace_header(state, Time.now.to_i)
+      @frame_stack.push D13n::Metric::Stream::SpanTracerHelpers.trace_header(state, Time.now.to_f)
       name_last_frame(options[:stream_name])
 
       set_default_stream_name(options[:stream_name], category)

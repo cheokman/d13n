@@ -31,6 +31,7 @@ describe D13n::Metric::Stream do
     before :each do
       allow(described_class).to receive(:nested_stream_name)
       allow(described_instance).to receive(:commit!)
+      allow(dummy_frame).to receive(:children_time).and_return(0)
     end
 
     it 'should call span tracer trace_footer' do
@@ -86,12 +87,12 @@ describe D13n::Metric::Stream do
 
     it 'should call collect_metric_data' do
       expect(described_instance).to receive(:collect_metric_data)
-      described_instance.commit!(dummy_state, 1000)
+      described_instance.commit!(dummy_state, 100, 1000)
     end
 
     it 'should call collect_metrics' do
       expect(described_instance).to receive(:collect_metrics)
-      described_instance.commit!(dummy_state, 1000)
+      described_instance.commit!(dummy_state, 100, 1000)
     end
   end
 
@@ -800,7 +801,7 @@ describe D13n::Metric::Stream do
           allow(described_class).to receive(:nested_stream_name)
           allow(D13n::Metric::Stream::SpanTracerHelpers).to receive(:trace_footer)
           allow(dummy_frame).to receive(:name)
-          allow(dummy_frame).to receive(:started_at).and_return(100)
+          allow(dummy_frame).to receive(:start_time).and_return(100)
         end
 
         it 'should call nested_stream_name' do
