@@ -35,29 +35,31 @@ module D13n
     end
 
     def service
-      threaded[:service] ||= D13n::Service
+      #threaded[:service] ||= D13n::Service
+      @service ||= D13n::Service
     end
 
     def service=(srv)
-      threaded[:service] = srv
+      #threaded[:service] = srv
+      @service = srv
     end
 
     def application
-      threaded[:application] ||= self
+      @application ||= self
     end
 
     def application=(app)
-      threaded[:application] = app
-      threaded[:app_name] = nil
-      threaded[:app_prefix] = nil
+      @application = app
+      @app_name = nil
+      @app_prefix = nil
     end
 
     def app_name
-      threaded[:app_name] ||= application.name.underscore
+      application.name.underscore
     end
 
     def app_prefix
-      threaded[:app_prefix] ||= app_name.upcase
+      app_name.upcase
     end
 
     def idc_name

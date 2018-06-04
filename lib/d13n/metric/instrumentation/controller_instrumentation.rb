@@ -12,7 +12,7 @@ module D13n::Metric::Instrumentation
       stream_options = create_stream_options(trace_options, category, state)
       begin
         stream = D13n::Metric::Stream.start(state, category, stream_options)
-
+        
         begin
           yield
         rescue => e
