@@ -13,7 +13,7 @@ describe D13n::Metric::Instrumentation::Sinatra do
     context 'when metric.app.sintra.auto_middleware.enable false' do
       
       before :each do
-        allow(D13n.config).to receive(:[]).with(:'metric.app.sinatra.auto_middleware.enable').and_return(false)
+        allow(D13n.config).to receive(:[]).with(:'metric.app.http.in.sinatra.auto_middleware.enable').and_return(false)
       end
 
       it 'should be false' do
@@ -24,7 +24,7 @@ describe D13n::Metric::Instrumentation::Sinatra do
     context 'when metric.app.sintra.auto_middleware.enable true' do
       
       before :each do
-        allow(D13n.config).to receive(:[]).with(:'metric.app.sinatra.auto_middleware.enable').and_return(true)
+        allow(D13n.config).to receive(:[]).with(:'metric.app.http.in.sinatra.auto_middleware.enable').and_return(true)
       end
 
       it 'should be false' do

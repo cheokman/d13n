@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    d13n (0.3.0.5)
+    d13n (0.3.0)
       bundler (~> 1.14)
       config_kit (= 0.0.14)
       statsd-instrument (~> 2.2, >= 2.2.0)

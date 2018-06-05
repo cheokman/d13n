@@ -147,11 +147,11 @@ module D13n::Metric
     end
 
     def apdex_t
-      stream_specific_apdex_t || D13n.config[:apdex_t]
+      stream_specific_apdex_t || D13n.config[:'metric.app.http.in.apdex_t']
     end
 
     def stream_specific_apdex_t
-      key = "web_stream_apdex_t.#{@frozen_name}".to_sym
+      key = "metric.app.http.in.apdex_t.#{@frozen_name}".to_sym
       D13n.config[key]
     end
 

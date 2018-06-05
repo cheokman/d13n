@@ -156,6 +156,45 @@ module D13n::Configuration
           :type => Array,
           :allowed_from_server => false,
           :description => "An array of candidate locations for the service\'s configuration file."
-        }
+        },
+      :'metric.channel.type' => {
+          :default => 'logger',
+          :public => true,
+          :type => String,
+          :allowed_from_server => true,
+          :description => 'Metric Channel Type.'
+      },
+      :'metric.app.http.in.apdex_t' => {
+        :default => 300,
+        :public => true,
+        :type => Integer,
+        :allowed_from_server => true,
+        :description => 'Metric HTTP IN Apdex Config Value.'
+      },
+      :'metric.app.http.in.tracable' => {
+        :default => true,
+        :public => true,
+        :type => D13n::Configuration::Boolean,
+        :description => 'Metric HTTP IN trace enable switch'
+      },
+      :'metric.app.http.in.sinatra.enable' => {
+      :default => true,
+      :public => true,
+      :type => D13n::Configuration::Boolean,
+      :description => 'enable http in trace for sinatra'
+      },
+      :'metric.app.http.in.sinatra.auto_middleware.enable' => {
+        :default => true,
+       :public => true,
+       :type => D13n::Configuration::Boolean,
+       :description => 'enable sinatra auto load middleware'
+      },
+      :'metric.app.http.out.tracable' => {
+        :default => true,
+        :public => true,
+        :type => D13n::Configuration::Boolean,
+        :allowed_from_server => true,
+        :description => "Metric HTTP OUT trace enable switch"
+      }
    }
 end

@@ -5,7 +5,7 @@ D13n::Metric::Instrumentation::Conductor.direct do
   named :sinatra
 
   depend_on do
-    D13n.config[:'metric.app.sinatra.enable'] &&
+    D13n.config[:'metric.app.http.in.sinatra.enable'] &&
     defined?(::Sinatra) && defined?(::Sinatra::Base) &&
     Sinatra::Base.private_method_defined?(:dispatch!) &&
     Sinatra::Base.private_method_defined?(:process_route) &&
@@ -94,7 +94,7 @@ module D13n::Metric::Instrumentation
       private
 
       def auto_middleware_enable?
-        D13n.config[:'metric.app.sinatra.auto_middleware.enable']
+        D13n.config[:'metric.app.http.in.sinatra.auto_middleware.enable']
       end
   
       

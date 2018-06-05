@@ -272,7 +272,7 @@ describe D13n::Metric::Stream do
 
   describe '#apdex_t' do
     before :each do
-      allow(D13n.config).to receive(:[]).with(:apdex_t).and_return(100)
+      allow(D13n.config).to receive(:[]).with(:'metric.app.http.in.apdex_t').and_return(100)
     end
 
     context 'when stream specific apdex_t not available' do
@@ -300,7 +300,7 @@ describe D13n::Metric::Stream do
     context 'when frozen_name available' do
       before :each do
         
-        allow(D13n.config).to receive(:[]).with(:'web_stream_apdex_t.dummy_name').and_return(200)
+        allow(D13n.config).to receive(:[]).with(:'metric.app.http.in.apdex_t.dummy_name').and_return(200)
         described_instance.instance_variable_set(:@frozen_name, 'dummy_name')
       end
 
