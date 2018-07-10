@@ -5,7 +5,7 @@ module D13n::Application
     end
 
     def config
-      @config ||= D13n::Configuration::Manager.new
+      @config ||= D13n.config
     end
 
     def config=(cfg)

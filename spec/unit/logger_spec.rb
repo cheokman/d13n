@@ -209,7 +209,7 @@ describe D13n::Logger do
       it 'log with prefix "** [D13n]"' do
         allow(D13n.config).to receive(:app_name).and_return("d13n")
         @logger.send(:set_log_format!)
-        expect(@logger.instance_variable_get(:@prefix)).to be_eql('** [D13n]')
+        expect(@logger.instance_variable_get(:@prefix)).to be_eql('** [Fake_app]')
       end
     end
 
@@ -273,7 +273,7 @@ describe D13n::Logger do
 
         it 'can return log string' do
           @logger.send(:set_log_format!)
-          log_data = "** [D13n][#{ts.strftime("%F %H:%M:%S %z")} (#{$$})] #{severity} request : #{st_msg}\n"
+          log_data = "** [Fake_app][#{ts.strftime("%F %H:%M:%S %z")} (#{$$})] #{severity} request : #{st_msg}\n"
           expect(@logger.formatter.call(severity,ts, 'd13n', st_msg)).to be_eql(log_data)
         end
       end

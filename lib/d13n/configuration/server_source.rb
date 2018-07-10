@@ -3,6 +3,7 @@ module D13n::Configuration
     SERVICE_PREFIXES = /^service/i
     PROPERTY_PREFIXES = /^property/i
     IDC_PREFIXES = /^idc/i
+    CLIENT_PREFIXES = /^client/i
 
     attr_accessor :type_map
 
@@ -56,7 +57,7 @@ module D13n::Configuration
     def self.filter_keys(instance)
       instance.delete_if do |key, _|
         s_key = key.to_s
-        if s_key.match(SERVICE_PREFIXES) || s_key.match(PROPERTY_PREFIXES) || s_key.match(IDC_PREFIXES)
+        if s_key.match(SERVICE_PREFIXES) || s_key.match(PROPERTY_PREFIXES) || s_key.match(IDC_PREFIXES) || s_key.match(CLIENT_PREFIXES)
           false
         else
           setting_spec = DEFAULTS[key.to_sym]

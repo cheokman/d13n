@@ -195,6 +195,10 @@ module D13n::Configuration
       hash
     end
 
+    def to_hash
+      DottedHash.new(apply_mask(flattened)).to_hash
+    end
+
     def to_collector_hash
       DottedHash.new(apply_mask(flattened)).to_hash.delete_if do |k, v|
         default = DEFAULTS[k]
