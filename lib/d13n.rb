@@ -5,6 +5,14 @@ module D13n
   class Error < StandardError;end
   
   class << self
+    def dry_run?
+      threaded[:dry_run] ||= false
+    end
+
+    def enable_dry_run
+      threaded[:dry_run] = true
+    end
+
     def config
       threaded[:config] ||= D13n::Configuration::Manager.new
     end
@@ -14,7 +22,11 @@ module D13n
     end
 
     def logger
-      threaded[:logger] ||= D13n::Logger::StartupLogger.instance
+      threaded[:logger] ||= if dry_run?
+        D13n::Logger::NullLogger.instance
+      else
+        D13n::Logger::StartupLogger.instance
+      end
     end
 
     def logger=(log)

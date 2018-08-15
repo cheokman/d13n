@@ -1,9 +1,10 @@
 # encoding: utf-8
 #require 'd13n/api/operation_state'
 require 'logger'
+require 'singleton'
 require 'd13n/logger/log_once'
 require 'd13n/logger/memory_logger'
-require 'singleton'
+require 'd13n/logger/null_logger'
 module D13n
   class Logger
     class SilenceLogger
