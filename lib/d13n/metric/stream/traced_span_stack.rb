@@ -64,6 +64,10 @@ module D13n::Metric
       def last
         @stack.last
       end
+
+      def size
+        @stack.size
+      end
     end
   end
 end
