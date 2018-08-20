@@ -10,7 +10,7 @@ module D13n::Metric
     SINATRA_PREFIX = 'controller.sinatra'.freeze
     MIDDLEWARE_PREFIX = 'controller.middleware'.freeze
 
-    WEB_TRANSACTION_CATEGORIES   = [:controller, :uri, :rack, :sinatra].freeze
+    WEB_TRANSACTION_CATEGORIES   = [:controller, :uri, :rack, :sinatra, :websocket].freeze
 
     APDEX_S = 'S'.freeze
     APDEX_T = 'T'.freeze
@@ -18,6 +18,7 @@ module D13n::Metric
 
     attr_accessor :state, :started_at, :uuid
     attr_accessor :http_response_code,
+                  :request_content_length,
                   :response_content_type,
                   :response_content_length, :frame_stack
 
@@ -119,6 +120,9 @@ module D13n::Metric
 
       @uuid = nil
       @exceptions = {}
+      @request_content_length = 0
+      @response_content_type = nil
+      @response_content_length = 0
     end
 
     def start(state)
@@ -210,7 +214,7 @@ module D13n::Metric
       metric_data ||= {}
       generate_default_metric_data(state, started_at, ended_time, metric_data)
       append_apdex_perf_zone(duration, metric_data)
-      append_web_response(@http_response_code, @response_content_type, @response_content_length, metric_data) if recording_web_transaction?
+      append_web_response(@http_response_code, @response_content_type, @response_content_length, @request_content_length, metric_data) if recording_web_transaction?
       metric_data
     end
 
@@ -242,12 +246,13 @@ module D13n::Metric
       metric_data[:apdex_perf_zone] = bucket_str if bucket_str
     end
 
-    def append_web_response(http_response_code,response_content_type,response_content_length,metric_data)
+    def append_web_response(http_response_code,response_content_type,response_content_length,request_content_length,metric_data)
       return if http_response_code.nil?
 
       metric_data[:http_response_code] = http_response_code
       metric_data[:http_response_content_type] = response_content_type
       metric_data[:http_response_content_length] = response_content_length
+      metric_data[:http_request_content_length] = request_content_length
     end
 
     def make_stream_name(name, category=nil)
