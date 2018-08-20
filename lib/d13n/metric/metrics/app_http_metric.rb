@@ -122,7 +122,7 @@ module D13n::Metric
 
       def start(state, t0, request)
         inject_request_headers(state, request)
-        stack = state.traced_stack
+        stack = state.traced_span_stack
         node = stack.push_frame(state, prefix , t0)
         return node
       rescue => e
@@ -167,7 +167,7 @@ module D13n::Metric
           end
         ensure
           if node
-            stack = state.traced_stack
+            stack = state.traced_span_stack
             stack.pop_frame(state, node, scoped_metric, t1)
           end
         end
