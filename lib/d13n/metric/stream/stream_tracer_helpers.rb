@@ -53,6 +53,12 @@ module D13n::Metric
           tags
         end
 
+        def stream_http_request_content_length_tags(metric_data)
+          tags = stream_basic_tags(metric_data)
+          tags << "request:length"
+          tags
+        end
+
         def stream_http_response_content_length_tags(metric_data)
           tags = stream_basic_tags(metric_data)
           tags << "response:length"
@@ -96,13 +102,18 @@ module D13n::Metric
       end
 
       def collect_response_content_length_metric(collector, state, gauge, metric_data, rate=1.0)
-        collector.gauge(metric_name("gauge"), gauge, sample_rate: rate, tags: stream_http_response_content_length_tags(metric_data))
+        collector.gauge(metric_name("gauge"), gauge.to_i, sample_rate: rate, tags: stream_http_response_content_length_tags(metric_data))
+      end
+
+      def collect_request_content_length_metric(collector, state, gauge, metric_data, rate=1.0)
+        collector.gauge(metric_name("gauge"), gauge.to_i, sample_rate: rate, tags: stream_http_request_content_length_tags(metric_data))
       end
 
       def collect_response_metric(collector, state, metric_data)
         collect_repsonse_code_metric(collector, state, metric_data)
         collect_response_content_type_metric(collector, state, metric_data)
         collect_response_content_length_metric(collector, state, metric_data[:http_response_content_length], metric_data)
+        collect_request_content_length_metric(collector, state, metric_data[:http_request_content_length], metric_data) unless metric_data[:http_request_content_length].to_i == 0
       end
 
       def collect_error_metric(collector, state, error, metric_data, count=1, rate=1.0 )
