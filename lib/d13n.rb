@@ -22,7 +22,7 @@ module D13n
     end
 
     def logger
-      threaded[:logger] ||= if dry_run?
+      @logger ||= if dry_run?
         D13n::Logger::NullLogger.instance
       else
         D13n::Logger::StartupLogger.instance
@@ -30,7 +30,7 @@ module D13n
     end
 
     def logger=(log)
-     threaded[:logger] = log
+     @logger = log
     end
 
     # def opt_state
