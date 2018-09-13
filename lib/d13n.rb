@@ -6,19 +6,19 @@ module D13n
   
   class << self
     def dry_run?
-      threaded[:dry_run] ||= false
+      @dry_run ||= false
     end
 
     def enable_dry_run
-      threaded[:dry_run] = true
+      @dry_run = true
     end
 
     def config
-      threaded[:config] ||= D13n::Configuration::Manager.new
+      @config ||= D13n::Configuration::Manager.new
     end
 
     def config=(cfg)
-      threaded[:config] = cfg
+      @config = cfg
     end
 
     def logger
@@ -47,12 +47,10 @@ module D13n
     end
 
     def service
-      #threaded[:service] ||= D13n::Service
       @service ||= D13n::Service
     end
 
     def service=(srv)
-      #threaded[:service] = srv
       @service = srv
     end
 
