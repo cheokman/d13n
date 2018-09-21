@@ -4,6 +4,7 @@ module D13n::Configuration
     PROPERTY_PREFIXES = /^property/i
     IDC_PREFIXES = /^idc/i
     CLIENT_PREFIXES = /^client/i
+    DEVELOPER_PREFIXED = /^developer/i
 
     attr_accessor :type_map
 
