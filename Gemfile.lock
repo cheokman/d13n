@@ -1,9 +1,9 @@
 PATH
   remote: .
   specs:
-    d13n (0.3.0)
+    d13n (0.4.6)
       bundler (~> 1.14)
-      config_kit (= 0.0.14)
+      config_kit (= 0.0.16)
       statsd-instrument (~> 2.2, >= 2.2.0)
 
 GEM
@@ -18,12 +18,12 @@ GEM
     ast (2.4.0)
     coderay (1.1.2)
     concurrent-ruby (1.0.5)
-    config_kit (0.0.14)
+    config_kit (0.0.16)
       bundler (~> 1.12)
-      diplomat (= 1.4.1)
+      diplomat (= 2.0.2)
       git (= 1.3.0)
     diff-lcs (1.3)
-    diplomat (1.4.1)
+    diplomat (2.0.2)
       faraday (~> 0.9)
       json
     docile (1.3.0)

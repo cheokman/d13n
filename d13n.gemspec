@@ -30,5 +30,5 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "bundler", "~> 1.14"
   spec.add_runtime_dependency 'statsd-instrument', '~> 2.2', '>= 2.2.0'
-  spec.add_runtime_dependency 'config_kit', '0.0.15'
+  spec.add_runtime_dependency 'config_kit', '0.0.16'
 end
