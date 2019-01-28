@@ -9,14 +9,15 @@ module Sinatra
       end
 
       def background_job_run!
+        return if @background_jobs.nil?
         @background_jobs.each do |j|
           j[:blk].call(j[:opts])
         end
       end
 
-      def run!(options = {}, &block)
+      def run!(*args, &block)
         background_job_run!
-        run_without_callback(options, block)
+        run_without_callback(*args, &block)
       end
     end
   end
