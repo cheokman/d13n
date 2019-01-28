@@ -121,6 +121,70 @@ git commit -m 'first init'
 git push origin master
 ```
 
+## Backgroud Job Example
+```
+module Websocket::Api
+  class Service < ::Sinatra::Base
+  #
+  # define service routes here
+  #
+    background_job "a" do |opts|
+      EventMachine.run {
+        timer = EventMachine::PeriodicTimer.new(1) do
+          Websocket.logger.info(Websocket.config.to_hash)
+        end
+      }
+    end
+
+    get '/ws' do
+      headers 'Access-Control-Allow-Origin' => '*'
+      headers 'Access-Control-Allow-Headers' => '*'
+
+      if request.websocket?
+        @srv_manager ||= RollingRestartWS::ServiceManager.new
+        @ws_manager = @srv_manager.ws_manager
+        request.websocket do |ws|
+          ws.onopen do
+            Websocket.logger.info 'Socket Client connected'
+          end
+
+          ws.onmessage do |msg|
+
+            mem = `ps -o rss= -p #{Process.pid}`.to_i
+            Websocket.logger.info "Socket Client message received(#{msg.size}) #{msg}"
+            @msg = msg
+            response = process :json
+            response = "#{response}, mem:#{mem}"
+            Websocket.logger.info "Socket Response(#{response.size}) #{response}"
+            ws.send(response)
+          end
+
+          ws.onclose do
+            Websocket.logger.debug 'Socket Client disconnected'
+            ws = nil
+          end
+        end
+
+      else
+        'Hello from WebSocket'
+      end
+    end
+
+    get '/service' do
+      process :json
+      
+    end
+
+    def process(format)
+      uri = URI('http://localhost:3004')
+      Net::HTTP.get(uri)
+      mem = `ps -o rss= -p #{Process.pid}`.to_i
+      "Hello again #{format}, mem: #{mem}"
+    end
+  end
+end
+```
+
 ## Developement Stage to build gem
 
 * checkout the master
