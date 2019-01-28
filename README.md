@@ -123,6 +123,7 @@ git push origin master
 
 ## Backgroud Job Example
 ```
+require 'd13n/service/background_job'
 module Websocket::Api
   class Service < ::Sinatra::Base
   #
