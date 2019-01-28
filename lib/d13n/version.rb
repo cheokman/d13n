@@ -2,7 +2,7 @@ module D13n
   module VERSION
     MAJOR     = 0
     MINOR     = 4
-    TINY      = 6
+    TINY      = 7
 
     STRING = [MAJOR, MINOR, TINY].join('.')
 
