@@ -21,7 +21,7 @@ module D13n::Configuration
     end
 
     def set_log_file
-      env_log = "#{D13n.app_prefix}_LOG" 
+      env_log = "#{D13n.app_prefix}_LOG"
       if ENV[env_log]
         if ENV[env_log].upcase == 'STDOUT'
           self[:log_file_path] = self[:log_file_name] = 'STDOUT'
@@ -63,6 +63,8 @@ module D13n::Configuration
         self[config_key] = value.to_f
       elsif type == Symbol
         self[config_key] = value.to_sym
+      elsif type == Array
+        self[config_key] = value.split(/\s*,\s*/)
       elsif type == D13n::Configuration::Boolean
         if value =~ /false|off|no/i
           self[config_key] = false
