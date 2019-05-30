@@ -37,6 +37,8 @@ module D13n::Configuration
         self[config_key] = value.to_f
       elsif type == Symbol
         self[config_key] = value.to_sym
+      elsif type == Array
+        self[config_key] = value.split(/\s*,\s*/)
       elsif type == D13n::Configuration::Boolean
         if value =~ /false|off|no/i
           self[config_key] = false
