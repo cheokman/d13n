@@ -43,11 +43,11 @@ module D13n
           config_data = ConfigKit::Manager.get(D13n.config.app_name)
         rescue ConfigKit::Client::ConfigKitReadError => e
           D13n.logger.error "Config Kit reads server error. #{e.message}"
-          raise D13n::ServiceStartError.new(e.message) if config_server_raise_on_failure?
+          raise ServiceStartError.new(e.message) if config_server_raise_on_failure?
         rescue Exception => e
           D13n.logger.error "Unknown Config Kit error. #{e.message}"
           D13n.logger.debug e
-          raise D13n::ServiceStartError.new(e.message) if config_server_raise_on_failure?
+          raise ServiceStartError.new(e.message) if config_server_raise_on_failure?
         end
         #
         # TODO: Empty to raise exception
@@ -65,11 +65,11 @@ module D13n
       end
 
       private
-      
+
       def determine_metric_channel
         D13n.config[:metric_channel_type] || D13n.config[:'metric.channel.type']
       end
-      
+
     end
   end
 end
