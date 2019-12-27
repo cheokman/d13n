@@ -16,7 +16,7 @@ module D13n::Metric
         @stack = []
       end
 
-      def push_frame(state, tag, time = Time.now.to_i)
+      def push_frame(state, tag, time = Time.now.to_f)
         frame = StackFrame.new(tag, time)
         @stack.push frame
         frame
@@ -26,7 +26,7 @@ module D13n::Metric
         frame = fetch_matching_frame(expected_frame)
         frame.end_time = time
         frame.name = name
-        
+
         note_children_time(frame, time, deduct_call_time_from_parent)
 
         frame

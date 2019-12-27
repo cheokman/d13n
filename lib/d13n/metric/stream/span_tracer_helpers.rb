@@ -7,7 +7,7 @@ module D13n::Metric
 
 
       extend self
-      
+
       def collect_span_duration_timing(collector, state, name, timing, metric_data, options, rate=1.0)
         collector.measure(metric_name("timing"), timing, sample_rate: rate, tags: stream_duration_tags(metric_data))
       end
@@ -32,14 +32,14 @@ module D13n::Metric
         stack.push_frame(state, :span_tracer, t0)
       end
 
-      def trace_footer(state, t0, first_name, expected_frame, options, t1=Time.now.to_i)
+      def trace_footer(state, t0, first_name, expected_frame, options, t1=Time.now.to_f)
         if expected_frame
           stack = state.traced_span_stack
           frame = stack.pop_frame(state, expected_frame, first_name, t1)
           duration, exclusive = get_timings(t0, t1, frame)
           metric_data = {:exclusive => exclusive}
           get_metric_data(state, t0, t1, metric_data)
-        
+
           if duration < MAX_ALLOWED_METRIC_DURATION
             if duration < 0
               D13n.logger.warn("metric_duration_negative:#{first_name} Metric #{first_name} has negative duration: #{duration} s")
@@ -48,12 +48,12 @@ module D13n::Metric
             if exclusive < 0
               D13n.logger.warn("metric_exclusive_negative: #{first_name} Metric #{first_name} has negative exclusive time: duration = #{duration} s, child_time = #{frame.children_time}")
             end
-           
+
             collect_span_metrics(state, first_name, duration, exclusive, metric_data, options)
           else
             D13n.logger.warn("too_huge_metric:#{first_name}, Ignoring metric #{first_name} with unacceptably large duration: #{duration} s")
           end
-          
+
         end
       end
 
