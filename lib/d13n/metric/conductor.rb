@@ -81,8 +81,8 @@ module D13n::Metric::Instrumentation
         perform!
       end
 
-      def depend_on
-        @dependences << Proc.new
+      def depend_on(&block)
+        @dependences << block
       end
 
       def check_dependences
@@ -115,8 +115,8 @@ module D13n::Metric::Instrumentation
         self.name = new_name
       end
 
-      def performances
-        @performances << Proc.new
+      def performances(&block)
+        @performances << block
       end
     end
   end
