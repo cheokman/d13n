@@ -2,11 +2,11 @@
 
 To reduce developer afford to apply docker techinology for Microserice, d13n gem privodes following features:
 
-* Microservice Scaffold
-* Configuration Management
-* Log Management
-* Metric Collection
-* Alert and Monitor
+- Microservice Scaffold
+- Configuration Management
+- Log Management
+- Metric Collection
+- Alert and Monitor
 
 d13n provides a executable command 'd13n' and some sub-commands to cater all freatures
 
@@ -14,11 +14,11 @@ d13n provides a executable command 'd13n' and some sub-commands to cater all fre
 
 To lower the barrier for developer bootstrap a docker compactable Microserivce application, d13n provides scaffold feature to boostrap Microservice application folder in:
 
-* CI Build and Release Docker files and scripts
-* CI Workflow Makefile 
-* DB Migration folder
-* Jenkinsfile
-* Application Configuration YAML file
+- CI Build and Release Docker files and scripts
+- CI Workflow Makefile
+- DB Migration folder
+- Jenkinsfile
+- Application Configuration YAML file
 
 ### How to Use
 
@@ -76,7 +76,7 @@ make test
 
 For library, d13n privods a bare option to scaffold some files and folders, which can help to speed up the library development with docker ready on CI testing.
 
-### How to use 
+### How to use
 
 Assume an library named pivot-api with empty folder
 
@@ -122,6 +122,7 @@ git push origin master
 ```
 
 ## Backgroud Job Example
+
 ```
 require 'd13n/service/background_job'
 module Websocket::Api
@@ -173,7 +174,7 @@ module Websocket::Api
 
     get '/service' do
       process :json
-      
+
     end
 
     def process(format)
@@ -188,12 +189,12 @@ end
 
 ## Developement Stage to build gem
 
-* checkout the master
-* build gem with gemspec file
-* install gem locally
+- checkout the master
+- build gem with gemspec file
+- install gem locally
 
 ```bash
-git clone http://{your name}@stash.mo.laxino.com/scm/~ben.wu/d13n.git
+git clone https://github.com/cheokman/d13n.git
 cd d13n
 gem build d13n.gemspec
 gem install -l d13n-{version}.gem
