@@ -26,14 +26,14 @@ module <%= application_base %>
   #        :description => 'Broker Host Port.'
   #    },
   #    :'service.broker.username' => {
-  #        :default => 'laxino_service',
+  #        :default => 'broker_service',
   #        :public => true,
   #        :type => String,
   #        :allowed_from_server => true,
   #        :description => 'Broker Host Service Username.'
   #    },
   #    :'service.broker.password' => {
-  #        :default => 'laxino_service',
+  #        :default => 'broker_service',
   #        :public => true,
   #        :type => String,
   #        :allowed_from_server => true,
@@ -41,8 +41,6 @@ module <%= application_base %>
   #    }
   #   }
   #   
-  # More information about configuration pls refer config_kit repository: http://stash.mo.laxino.com/users/ben.wu/repos/config_kit/browse 
-  # Or Axle Configuration documentation: http://stash.mo.laxino.com/projects/G2/repos/idc_config/browse 
 end
 
 require '<%= application %>/service'

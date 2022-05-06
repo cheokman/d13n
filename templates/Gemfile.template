@@ -1,5 +1,4 @@
-source 'http://gems.sd.laxino.com'
-#source 'http://rubygems.org'
+source 'http://rubygems.org'
 
 gem 'd13n', '<%= D13n::VERSION::STRING %>'
 gem 'sinatra', '2.0.0'

@@ -12,7 +12,7 @@ services:
       HOST_PORT: 3000
       MYSQL_HOST: db
       MYSQL_DATABASE: <%= application %>_production
-      MYSQL_USER: laxino
+      MYSQL_USER: user
       MYSQL_PASSWORD: password
       TEST_OUTPUT_DIR: /opt/deploy/application/reports
     command: ["bundle", "exec", "thin", "start"]
@@ -23,7 +23,7 @@ services:
     expose:
       - "3306"
     environment:
-      MYSQL_USER: laxino
+      MYSQL_USER: user
       MYSQL_DATABASE: <%= application %>_production
       MYSQL_PASSWORD: password
       MYSQL_ROOT_PASSWORD: password
