@@ -7,7 +7,7 @@ Gem::Specification.new do |spec|
   spec.name          = "d13n"
   spec.version       = D13n::VERSION::STRING
   spec.authors       = ["Ben Wu"]
-  spec.email         = ["ben.wu@laxino.com"]
+  spec.email         = ["wucheokman@gamil.com"]
 
   spec.summary       = %q{Write a short summary, because Rubygems requires one.}
   spec.description   = %q{Write a longer description or delete this line.}
