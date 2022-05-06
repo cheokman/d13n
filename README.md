@@ -85,7 +85,7 @@ mkdir pivot-api
 cd pivot-api
 
 git init .
-git remote add origin http://ben.wu@stash.mo.laxino.com/scm/g2/pivot-api.git
+git remote add origin http://ben.wu@code.com/scm/g2/pivot-api.git
 ```
 
 After git repository create and add origin path, next to use d13n to scaffold a library folders and files
