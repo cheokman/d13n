@@ -1,4 +1,4 @@
-source 'http://gems.sd.laxino.com'
+source 'http://rubygems.org'
 
 #gem 'config_kit'
 gemspec
